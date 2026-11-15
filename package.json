@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "prepare": "husky",
-    "lint:backend": "eslint \"backend/src/**/*.ts\" -c backend/.eslintrc.json --fix",
-    "lint:frontend": "eslint \"frontend/src/**/*.{ts,tsx}\" -c frontend/.eslintrc.json --fix",
+    "lint:backend": "eslint \"backend/src/**/*.ts\" -c backend/.eslintrc.json --resolve-plugins-relative-to . --no-error-on-unmatched-pattern --fix",
+    "lint:frontend": "eslint \"frontend/src/**/*.{ts,tsx}\" -c frontend/.eslintrc.json --resolve-plugins-relative-to . --no-error-on-unmatched-pattern --fix",
     "lint": "npm run lint:backend && npm run lint:frontend",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .prettierignore",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .prettierignore"
