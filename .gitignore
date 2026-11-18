@@ -47,3 +47,6 @@ desktop.ini
 .cache/
 tmp/
 temp/
+
+# Local synced task files
+tasks.csv
