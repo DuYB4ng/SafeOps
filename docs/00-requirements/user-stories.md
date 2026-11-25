@@ -17,8 +17,8 @@ Quy trình và quy tắc nghiệp vụ (BR) xem [`overview.md`](overview.md); va
 - US-03: Là điều phối viên, tôi muốn thấy cảnh báo mới ngay khi có để xử lý kịp thời. _(FR-ALERT-05, FR-RT-01)_
 - US-04: Là điều phối viên, tôi muốn xác nhận, loại bỏ hoặc gộp cảnh báo để hàng đợi luôn sạch. _(FR-ALERT-06, FR-ALERT-07)_
 - US-05: Là điều phối viên, tôi muốn nhập cảnh báo khi nhận điện thoại. _(FR-ALERT-02)_
-- US-06: Là điều phối viên, tôi muốn xem gợi ý lực lượng phù hợp và gần nhất để điều phối nhanh. _(FR-DISP-01)_
-- US-07: Là điều phối viên, tôi muốn giao lệnh cho một hoặc nhiều lực lượng. _(FR-DISP-02, FR-DISP-03)_
+- US-06: Là điều phối viên, tôi muốn xem gợi ý lực lượng phù hợp chuyên môn (ví dụ: cháy → ưu tiên gợi ý đội PCCC) và gần nhất để chủ động chọn điều phối thủ công nhanh chóng. _(FR-DISP-01)_
+- US-07: Là điều phối viên, tôi muốn chủ động chọn và giao lệnh thủ công cho một hoặc nhiều lực lượng đang sẵn sàng (kể cả chọn ngoài danh sách gợi ý nếu đội chuyên môn bận). _(FR-DISP-02, FR-DISP-03)_
 - US-08: Là điều phối viên, tôi muốn theo dõi tiến độ mọi sự cố trên bản đồ và danh sách. _(FR-MAP-01, FR-MAP-06)_
 - US-09: Là điều phối viên, tôi muốn được cảnh báo khi một việc sắp/đã quá hạn. _(FR-INC-10)_
 - US-10: Là điều phối viên, tôi muốn đóng sự cố sau khi lực lượng báo hoàn thành. _(FR-INC-04)_
@@ -101,8 +101,8 @@ Ký hiệu độ ưu tiên: **M** = Must (bắt buộc MVP) · **S** = Should (n
 
 | Mã         | Yêu cầu                                                                                                                                                           | Ưu tiên |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| FR-DISP-01 | Với sự cố đã xác nhận, hệ thống gợi ý danh sách lực lượng: đúng loại ([`overview.md`](overview.md) mục 5.3), đang `AVAILABLE`, sắp xếp theo khoảng cách đến sự cố | M       |
-| FR-DISP-02 | OPERATOR chọn một hoặc nhiều lực lượng và giao lệnh, có thể kèm chỉ dẫn                                                                                           | M       |
+| FR-DISP-01 | Với sự cố đã xác nhận, hệ thống gợi ý danh sách lực lượng theo thứ tự ưu tiên chuyên môn trong [`overview.md`](overview.md) mục 5.3 (ví dụ: sự cố `FIRE` ưu tiên `FIRE_FIGHTING` trước các lực lượng hỗ trợ), đang `AVAILABLE`, sắp xếp theo khoảng cách đến sự cố | M       |
+| FR-DISP-02 | OPERATOR/COMMANDER điều phối **thủ công**: tự chọn một hoặc nhiều lực lượng đang `AVAILABLE` (từ danh sách gợi ý hoặc từ danh sách toàn bộ lực lượng sẵn sàng nếu đội chuyên môn bận) và giao lệnh kèm chỉ dẫn; hệ thống không tự động điều phối | M       |
 | FR-DISP-03 | Một sự cố có thể có nhiều lệnh điều phối; mỗi lệnh có trạng thái riêng ([`overview.md`](overview.md) mục 4.3)                                                     | M       |
 | FR-DISP-04 | RESPONDER xem danh sách việc được giao cho lực lượng của mình                                                                                                     | M       |
 | FR-DISP-05 | RESPONDER chấp nhận hoặc từ chối lệnh (từ chối bắt buộc có lý do), rồi cập nhật `EN_ROUTE` → `ON_SCENE` → `DONE`                                                  | M       |

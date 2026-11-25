@@ -25,17 +25,15 @@ SafeOps/
 ├── .agent/rules/        # Quy tắc phát triển cho AI Agent
 ├── AGENTS.md            # Bản đồ điều hướng và quy tắc AI Agent
 ├── README.md            # Hướng dẫn dự án
-│
-├── apps/
-│   ├── backend/         # NestJS Server (Cổng 3001, Swagger: /api)
-│   └── frontend/        # Next.js Web App (Cổng 3000)
-│
+├── backend/             # NestJS Server (Cổng 3001, Swagger: /api)
+├── frontend/            # Next.js Web App (Cổng 3000)
 └── docs/
     ├── 00-requirements/ # Yêu cầu nghiệp vụ, vai trò, User Stories
     ├── 01-srs/          # Đặc tả yêu cầu phần mềm chi tiết (srs.md)
     ├── 02-architecture/ # Cấu trúc thư mục, máy trạng thái, Socket.IO events
     ├── 03-database/     # Thiết kế CSDL TypeORM (erd.md)
-    └── 04-api/          # Hợp đồng REST API (api-contract.md)
+    ├── 04-api/          # Hợp đồng REST API (api-contract.md)
+    └── 05-plan/         # Kế hoạch thực thi 4 tuần (implementation-plan.md)
 ```
 
 ---
@@ -79,10 +77,10 @@ Mật khẩu chung cho môi trường phát triển: `{Role}@123`
 
 ```bash
 # 1. Chạy Backend & Database
-cd apps/backend
+cd backend
 docker compose up --build
 
 # 2. Chạy Frontend
-cd ../frontend
+cd frontend
 docker compose up --build
 ```

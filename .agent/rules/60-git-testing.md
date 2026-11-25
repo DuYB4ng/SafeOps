@@ -67,7 +67,7 @@ Tạo Cảnh báo -> Operator Xác nhận (thành Sự cố) -> Gợi ý & Giao 
 Trước khi tạo Pull Request hoặc gộp nhánh vào `develop` / `main`, chạy chuỗi lệnh sau trong thư mục tương ứng:
 
 ```bash
-# Tại apps/backend hoặc apps/frontend
+# Tại backend/ hoặc frontend/
 pnpm lint          # Đảm bảo không có lỗi quy chuẩn mã nguồn
 pnpm test          # Đảm bảo toàn bộ unit test thành công
 pnpm build         # Đảm bảo biên dịch TypeScript không lỗi

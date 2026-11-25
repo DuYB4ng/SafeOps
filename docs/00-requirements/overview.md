@@ -89,7 +89,7 @@ Hệ thống phục vụ **trung tâm điều hành an ninh của một khu côn
    - Xác nhận: tạo sự cố với loại, mức ưu tiên, vị trí.
    - Loại bỏ: báo nhầm hoặc không hợp lệ (bắt buộc ghi lý do).
    - Gộp: trùng với sự cố đang xử lý.
-4. **Điều phối** — hệ thống gợi ý lực lượng phù hợp; Operator chọn và giao lệnh.
+4. **Điều phối thủ công** — hệ thống gợi ý danh sách lực lượng phù hợp theo loại sự cố, trạng thái sẵn sàng (`AVAILABLE`) và khoảng cách gần nhất (ví dụ: sự cố cháy ưu tiên gợi ý đội cứu hỏa PCCC); Operator chủ động chọn đội và bấm giao lệnh (hệ thống không tự động điều phối).
 5. **Xử lý hiện trường** — lực lượng nhận lệnh → di chuyển → đến nơi → xử lý, cập nhật trạng thái, ghi chú, ảnh.
 6. **Theo dõi** — Operator và Commander theo dõi mọi thay đổi trên bản đồ và danh sách theo thời gian thực.
 7. **Kết thúc** — lực lượng báo hoàn thành → Operator xác nhận đã giải quyết → Commander (hoặc Operator, tùy cấu hình) đóng sự cố, ghi kết quả.
@@ -179,6 +179,12 @@ Quan hệ gợi ý loại sự cố → loại lực lượng phù hợp:
 | `INFRASTRUCTURE` | `TECHNICAL`, `SECURITY`                         |
 | `OTHER`          | Operator tự chọn                                |
 
+**Nguyên tắc điều phối thủ công có gợi ý:**
+
+- **Không tự động cử đội:** Hệ thống chỉ gợi ý danh sách phù hợp; mọi lệnh điều phối đều do Operator/Commander chủ động chọn đội và bấm giao lệnh.
+- **Ví dụ minh họa (Sự cố Cháy — `FIRE`):** Hệ thống ưu tiên gợi ý các đội **Cứu hỏa (`FIRE_FIGHTING`)** đang `AVAILABLE` và gần nhất lên đầu danh sách, tiếp theo là các đội hỗ trợ (`SECURITY`, `MEDICAL`). Operator kiểm tra rồi chọn cử xe PCCC tới hiện trường (hoặc cử thêm bảo vệ/y tế hỗ trợ nếu cần).
+- **Linh hoạt khi đội chuyên môn bận:** Nếu toàn bộ đội đúng chuyên môn đều đang `BUSY` hoặc `OFFLINE`, Operator vẫn có thể xem các đội đang `AVAILABLE` khác để tự chọn và giao lệnh thủ công.
+
 ---
 
 ## 6. Sự kiện thời gian thực
@@ -217,6 +223,7 @@ Quan hệ gợi ý loại sự cố → loại lực lượng phù hợp:
 | BR-12 | Mức ưu tiên có thể được nâng/hạ sau khi tạo sự cố; thay đổi phải ghi nhật ký kèm lý do                                               |
 | BR-13 | Báo cáo của REPORTER mặc định ở mức ưu tiên chưa xác định cho tới khi OPERATOR phân loại                                             |
 | BR-14 | Cảnh báo từ nguồn tự động có thể mang sẵn loại và mức ưu tiên đề xuất, nhưng OPERATOR vẫn xác nhận                                   |
+| BR-15 | Điều phối lực lượng thực hiện thủ công bởi OPERATOR/COMMANDER; hệ thống chỉ gợi ý theo chuyên môn phù hợp (ví dụ: cháy → ưu tiên PCCC), trạng thái `AVAILABLE` và cự ly gần nhất, không tự động giao lệnh |
 
 ---
 

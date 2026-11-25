@@ -9,7 +9,7 @@
 
 ## 1. Nguyên tắc chung
 
-1. **Một nguồn sự thật:** logic máy trạng thái và bảng chuyển trạng thái nằm trong backend (`apps/backend/src/common/state-machine/` hoặc module tương ứng, ví dụ `modules/incidents/incident-transitions.ts`). Backend dùng nó để chặn chuyển sai; frontend nhận danh sách `allowedActions` từ backend để hiển thị các nút hợp lệ.
+1. **Một nguồn sự thật:** logic máy trạng thái và bảng chuyển trạng thái nằm trong backend (`backend/src/common/state-machine/` hoặc module tương ứng, ví dụ `modules/incidents/incident-transitions.ts`). Backend dùng nó để chặn chuyển sai; frontend nhận danh sách `allowedActions` từ backend để hiển thị các nút hợp lệ.
 2. **Mọi chuyển trạng thái đi qua service**, không bao giờ `UPDATE status` trực tiếp từ controller hoặc repository.
 3. **Mỗi chuyển trạng thái chạy trong một transaction** và gồm: kiểm tra quyền → kiểm tra điều kiện → cập nhật → ghi nhật ký (`incident_logs`) → cập nhật các đối tượng liên động (lực lượng, trạng thái sự cố suy ra).
 4. **Phát sự kiện sau khi commit**, không phát trong transaction (xem `realtime-events.md` mục 5).
@@ -125,7 +125,7 @@ stateDiagram-v2
 
 Gọi **lệnh hoạt động** là lệnh có trạng thái `ASSIGNED`, `ACCEPTED`, `EN_ROUTE` hoặc `ON_SCENE`. Lệnh `DONE`, `DECLINED`, `CANCELLED` là lệnh đã kết thúc.
 
-Sau mỗi thay đổi của một lệnh (tạo, đổi trạng thái, thu hồi), nếu sự cố đang ở `CONFIRMED`, `DISPATCHED` hoặc `IN_PROGRESS`, tính lại trạng thái bằng hàm thuần sau (đặt trong `apps/backend/src/modules/incidents/derive-incident-status.ts`, có kiểm thử riêng):
+Sau mỗi thay đổi của một lệnh (tạo, đổi trạng thái, thu hồi), nếu sự cố đang ở `CONFIRMED`, `DISPATCHED` hoặc `IN_PROGRESS`, tính lại trạng thái bằng hàm thuần sau (đặt trong `backend/src/modules/incidents/derive-incident-status.ts`, có kiểm thử riêng):
 
 ```ts
 export function deriveIncidentStatus(
@@ -216,7 +216,8 @@ stateDiagram-v2
 - Chỉ lệnh ở `ASSIGNED` mới được từ chối. Đã chấp nhận rồi thì chỉ có thể tiếp tục hoặc bị OPERATOR thu hồi.
 - **Giải phóng lực lượng:** sau khi lệnh kết thúc (`DONE`, `DECLINED`, `CANCELLED`), nếu lực lượng không còn lệnh hoạt động nào thì chuyển `AVAILABLE` (TR-UN-02).
 - Một sự cố có thể có nhiều lệnh; một lực lượng không được có hai lệnh hoạt động cùng lúc.
-- Lực lượng gợi ý theo FR-DISP-01 chỉ là gợi ý. Backend **không bắt buộc** đúng loại lực lượng, nhưng bắt buộc `AVAILABLE`.
+- **Điều phối thủ công (BR-15):** Lệnh điều phối (`TR-DP-01`) chỉ được tạo khi `OPERATOR` hoặc `COMMANDER` chủ động chọn lực lượng và gửi yêu cầu giao lệnh; hệ thống không tự động điều phối khi xác nhận cảnh báo/sự cố.
+- Lực lượng gợi ý theo `FR-DISP-01` (ưu tiên theo thứ tự `suggested_unit_types` của loại sự cố, ví dụ `FIRE` ưu tiên gợi ý `FIRE_FIGHTING` trước các lực lượng hỗ trợ và sắp xếp theo cự ly Haversine) chỉ mang tính hỗ trợ quyết định. Backend **không bắt buộc** đúng loại lực lượng gợi ý (cho phép chọn thủ công lực lượng khác loại nếu đội chuyên môn bận), nhưng bắt buộc lực lượng được chọn phải đang `AVAILABLE`.
 
 ---
 
@@ -264,7 +265,7 @@ Với sự cố tạo trực tiếp (không từ cảnh báo), mốc nhận lấ
 
 ## 8. SLA
 
-Bảng SLA nằm ở [`overview.md`](../00-requirements/overview.md) mục 5.2. MVP đặt hằng số trong `apps/backend/src/modules/sla/sla.constants.ts`; cấu hình động (FR-ADMIN-03) để sau.
+Bảng SLA nằm ở [`overview.md`](../00-requirements/overview.md) mục 5.2. MVP đặt hằng số trong `backend/src/modules/sla/sla.constants.ts`; cấu hình động (FR-ADMIN-03) để sau.
 
 | SLA       | Bắt đầu                | Kết thúc                                        | Cờ vi phạm                       |
 | --------- | ---------------------- | ----------------------------------------------- | -------------------------------- |
@@ -307,7 +308,7 @@ Lỗi kiểm tra dữ liệu đầu vào (DTO) trả `400` theo chuẩn của `V
 Backend là nguồn sự thật cho logic máy trạng thái:
 
 ```
-apps/backend/src/
+backend/src/
 ├── common/
 │   ├── state-machine/
 │   │   ├── transition-rule.interface.ts # kiểu TransitionRule + hàm findTransition
@@ -334,7 +335,7 @@ apps/backend/src/
         └── units.service.ts
 ```
 
-Frontend giữ bản sao các enum và interface tương ứng tại `apps/frontend/src/types/enums.ts` và render nút hành động dựa trên `incident.allowedActions` do backend trả về.
+Frontend giữ bản sao các enum và interface tương ứng tại `frontend/src/types/enums.ts` và render nút hành động dựa trên `incident.allowedActions` do backend trả về.
 
 ### 10.2 Dạng dữ liệu của bảng chuyển
 

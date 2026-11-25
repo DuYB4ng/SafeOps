@@ -178,8 +178,8 @@ gantt
     - Responder từ chối `DECLINED`: Lực lượng về lại `AVAILABLE`, sự cố quay về `CONFIRMED`, thông báo Operator (BR-08).
 - **BE4:**
   - Xây dựng module `units`: Quản lý danh bạ lực lượng, cập nhật trạng thái `AVAILABLE`/`OFFLINE` (FR-UNIT-04), cập nhật vị trí thủ công.
-  - Thuật toán gợi ý điều phối `GET /api/v1/units/suggestions`: Lọc đơn vị đúng loại chuyên môn, trạng thái `AVAILABLE`, tính khoảng cách Haversine và sắp xếp tăng dần (FR-DISP-01, BR-11).
-  - Xây dựng module `dispatch`: Các endpoint xử lý lệnh điều phối theo ma trận quyền (`POST /dispatches`, `accept`, `decline`, `en-route`, `on-scene`, `done`, `cancel`).
+  - Thuật toán gợi ý điều phối `GET /api/v1/units/suggestions`: Lọc đơn vị `AVAILABLE`, ưu tiên theo thứ tự chuyên môn trong `suggested_unit_types` (ví dụ `FIRE` ưu tiên `FIRE_FIGHTING` trước các đội hỗ trợ), rồi tính khoảng cách Haversine và sắp xếp tăng dần (FR-DISP-01, BR-11, BR-15).
+  - Xây dựng module `dispatch`: Các endpoint xử lý lệnh điều phối thủ công theo ma trận quyền (`POST /dispatches` cho phép Operator/Commander chọn bất kỳ đơn vị `AVAILABLE` nào mà không ép cứng đúng loại gợi ý, cùng các bước `accept`, `decline`, `en-route`, `on-scene`, `done`, `cancel`).
   - Xây dựng module `realtime`:
     - Cấu hình `RealtimeGateway` (Socket.IO): Middleware xác thực JWT khi kết nối, phân phòng tự động (`user:{id}`, `role:{ROLE}`, `unit:{id}`).
     - Viết `RealtimeListener`: Lắng nghe sự kiện nội bộ `EventEmitter2` phát ra sau khi transaction commit, định tuyến sự kiện Socket đến đúng danh sách phòng (Room-based).
@@ -195,7 +195,7 @@ gantt
 - **FE1:**
   - Xây dựng màn hình Chi tiết Sự cố (`/incidents/[id]`):
     - Khối thông tin chi tiết, tọa độ bản đồ mini, danh sách lực lượng đang tham gia.
-    - Modal Điều phối Lực lượng: Hiển thị danh sách gợi ý lực lượng (kèm khoảng cách tính theo mét), chọn đội và nhập chỉ dẫn tác chiến.
+    - Modal Điều phối Lực lượng (Thủ công): Hiển thị nhóm **"Đề xuất phù hợp nhất"** (ví dụ sự cố cháy ưu tiên Xe PCCC gần nhất kèm khoảng cách tính theo mét) và tùy chọn xem **"Tất cả lực lượng sẵn sàng (`AVAILABLE`)"** để Operator chủ động chọn đội (kể cả khi đội chuyên môn đều bận) và nhập chỉ dẫn tác chiến.
     - Khối Timeline (dòng thời gian) hiển thị nhật ký bất biến lấy từ `/incidents/:id/logs`.
     - Render các nút hành động theo mảng `incident.allowedActions` từ Backend (Đóng sự cố, Hủy sự cố, Đổi mức ưu tiên).
 

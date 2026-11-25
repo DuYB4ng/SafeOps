@@ -6,7 +6,7 @@
 
 ## 1. Nguyên tắc (giữ đơn giản)
 
-1. **Hai ứng dụng độc lập** trong cùng một repo: `apps/backend` (NestJS) và `apps/frontend` (Next.js). Mỗi bên có `package.json`, `Dockerfile`, `docker-compose.yml`, `.env` riêng và **tự chạy được độc lập**.
+1. **Hai ứng dụng độc lập** trong cùng một repo: `backend/` (NestJS) và `frontend/` (Next.js). Mỗi bên có `package.json`, `Dockerfile`, `docker-compose.yml`, `.env` riêng và **tự chạy được độc lập**.
 2. **Không có package dùng chung.** Backend là nguồn sự thật cho enum, trạng thái và quy tắc nghiệp vụ. Frontend giữ một bản sao nhỏ các enum và kiểu dữ liệu ở `src/types/`; khi backend đổi thì cập nhật theo `docs/04-api/`.
 3. **Frontend không tự viết lại luật chuyển trạng thái.** Backend trả về danh sách hành động được phép trong dữ liệu sự cố (ví dụ `allowedActions: ["CANCEL", "ASSIGN"]`), frontend chỉ hiển thị nút theo danh sách đó.
 4. **Tài liệu ở `docs/`** là chuẩn. Khi code và tài liệu mâu thuẫn, sửa tài liệu trước rồi mới sửa code.
@@ -23,17 +23,15 @@ SafeOps/
 ├── AGENTS.md                     # bản đồ dự án cho AI agent (xem ghi chú bên dưới)
 ├── README.md                     # cách chạy backend và frontend
 ├── .gitignore
-│
-├── apps/
-│   ├── backend/                  # NestJS, tự chạy docker compose riêng
-│   └── frontend/                 # Next.js, tự chạy docker compose riêng
-│
+├── backend/                      # NestJS, tự chạy docker compose riêng
+├── frontend/                     # Next.js, tự chạy docker compose riêng
 └── docs/
     ├── 00-requirements/          # overview, roles-permissions, user-stories
     ├── 01-srs/                   # srs.md (Đặc tả yêu cầu phần mềm chuẩn)
     ├── 02-architecture/          # folder-structure, incident-state-machine, realtime-events
     ├── 03-database/              # erd.md
-    └── 04-api/                   # api-contract.md
+    ├── 04-api/                   # api-contract.md
+    └── 05-plan/                  # implementation-plan.md
 ```
 
 **Ghi chú về `AGENTS.md` và `.agent/`:**
@@ -41,16 +39,16 @@ SafeOps/
 - Theo tài liệu Antigravity tôi đã tra, tên file chuẩn dùng chung giữa các công cụ là **`AGENTS.md`** (có chữ **S**). Trong ảnh của bạn hiện là `AGENT.md`; nên đổi tên, rồi mở phần Customizations/Rules trong ứng dụng để kiểm tra agent đã nhận.
 - Thư mục `.agent/rules/` (số ít) là tên cũ nhưng vẫn được hỗ trợ; tên mới là `.agents/rules/`. Giữ `.agent/` như hiện tại là được, đừng tạo cả hai.
 - Chỉ các file `.md` nằm **trực tiếp** trong `rules/` được nạp, không đặt thư mục con.
-- Đừng đặt `AGENTS.md` bên trong `apps/backend` hay `apps/frontend`: quy tắc riêng của từng bên hãy viết thành file trong `.agent/rules/` (ví dụ `backend-nestjs.md`, `frontend-nextjs.md`).
+- Đừng đặt `AGENTS.md` bên trong `backend/` hay `frontend/`: quy tắc riêng của từng bên hãy viết thành file trong `.agent/rules/` (ví dụ `10-backend-nestjs.md`, `20-frontend-nextjs.md`).
 
 ---
 
-## 3. Backend (`apps/backend`)
+## 3. Backend (`backend/`)
 
 Theo cách tổ chức phổ biến của NestJS: **chia theo tính năng (module)**, phần dùng chung đặt ở `common`, cấu hình ở `config`, cơ sở dữ liệu ở `database`.
 
 ```
-apps/backend/
+backend/
 ├── src/
 │   ├── main.ts                          # khởi động: tiền tố /api/v1, Swagger, CORS, ValidationPipe
 │   ├── app.module.ts
@@ -165,12 +163,12 @@ Với các module có bảng chuyển trạng thái, file `*-transitions.ts` n�
 
 ---
 
-## 4. Frontend (`apps/frontend`)
+## 4. Frontend (`frontend/`)
 
 Theo cách tổ chức phổ biến của Next.js App Router: thư mục `app/` chỉ chứa **route và layout**, phần còn lại chia theo tính năng ở `features/`.
 
 ```
-apps/frontend/
+frontend/
 ├── src/
 │   ├── app/                                 # chỉ route và layout mỏng
 │   │   ├── layout.tsx
@@ -294,13 +292,13 @@ Chi tiết quyền ở [`roles-permissions.md`](../00-requirements/roles-permiss
 
 |                       | Backend                                                             | Frontend                    |
 | --------------------- | ------------------------------------------------------------------- | --------------------------- |
-| Thư mục               | `apps/backend`                                                      | `apps/frontend`             |
+| Thư mục               | `backend/`                                                          | `frontend/`                 |
 | Lệnh chạy             | `docker compose up --build`                                         | `docker compose up --build` |
 | Service trong compose | `db` (PostgreSQL), `backend`                                        | `frontend`                  |
 | Cổng                  | `3001` (API + Socket.IO), `5432` (DB)                               | `3000`                      |
 | Địa chỉ               | `http://localhost:3001/api/v1`, Swagger `http://localhost:3001/api` | `http://localhost:3000`     |
 
-### 5.1 `apps/backend/docker-compose.yml` (mẫu)
+### 5.1 `backend/docker-compose.yml` (mẫu)
 
 ```yaml
 services:
@@ -342,7 +340,7 @@ volumes:
   pgdata:
 ```
 
-### 5.2 `apps/frontend/docker-compose.yml` (mẫu)
+### 5.2 `frontend/docker-compose.yml` (mẫu)
 
 ```yaml
 services:
@@ -384,7 +382,7 @@ Dùng một Dockerfile nhiều giai đoạn: `development` (cài thư viện, ch
 
 ## 6. Biến môi trường
 
-### 6.1 Backend (`apps/backend/.env.example`)
+### 6.1 Backend (`backend/.env.example`)
 
 | Biến                                                | Ý nghĩa                                               |
 | --------------------------------------------------- | ----------------------------------------------------- |
@@ -398,7 +396,7 @@ Dùng một Dockerfile nhiều giai đoạn: `development` (cài thư viện, ch
 | `UPLOAD_DIR`                                        | Thư mục lưu ảnh                                       |
 | `SLA_CHECK_INTERVAL_SECONDS`                        | Chu kỳ kiểm tra SLA (mặc định 30)                     |
 
-### 6.2 Frontend (`apps/frontend/.env.example`)
+### 6.2 Frontend (`frontend/.env.example`)
 
 | Biến                     | Ý nghĩa                                           |
 | ------------------------ | ------------------------------------------------- |
@@ -411,7 +409,7 @@ Không commit file `.env`. Mọi biến mới phải được thêm vào `.env.e
 
 ## 7. Script thường dùng
 
-**Backend** (chạy trong `apps/backend`, thay `npm` bằng `pnpm` nếu nhóm dùng pnpm):
+**Backend** (chạy trong `backend/`, thay `npm` bằng `pnpm` nếu nhóm dùng pnpm):
 
 | Lệnh                                                 | Việc làm                                           |
 | ---------------------------------------------------- | -------------------------------------------------- |
@@ -422,7 +420,7 @@ Không commit file `.env`. Mọi biến mới phải được thêm vào `.env.e
 | `npm run seed`                                       | Nạp dữ liệu mẫu                                    |
 | `npm run simulate`                                   | Chạy `scripts/simulate-alerts.ts` bắn cảnh báo giả |
 
-**Frontend** (chạy trong `apps/frontend`):
+**Frontend** (chạy trong `frontend/`):
 
 | Lệnh                             | Việc làm                                    |
 | -------------------------------- | ------------------------------------------- |

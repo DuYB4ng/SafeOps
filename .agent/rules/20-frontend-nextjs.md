@@ -1,6 +1,6 @@
 # Quy tắc 20: Phát triển Frontend Next.js (Frontend Rules)
 
-**Áp dụng cho:** Thư mục `apps/frontend/`.  
+**Áp dụng cho:** Thư mục `frontend/`.  
 **Tham chiếu tài liệu:** [`docs/02-architecture/folder-structure.md`](../../docs/02-architecture/folder-structure.md), [`docs/02-architecture/realtime-events.md`](../../docs/02-architecture/realtime-events.md), [`docs/04-api/api-contract.md`](../../docs/04-api/api-contract.md).
 
 ---

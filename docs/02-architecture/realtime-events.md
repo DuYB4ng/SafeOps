@@ -45,7 +45,7 @@ Khi kết nối thành công, server tự cho socket vào các phòng sau, suy r
 | `role:{ROLE}`   | Mọi người dùng, ví dụ `role:OPERATOR`, `role:COMMANDER` | Phát cho cả nhóm điều hành                            |
 | `unit:{unitId}` | RESPONDER thuộc lực lượng đó                            | Lệnh điều phối và cập nhật sự cố của lực lượng        |
 
-Tên phòng tạo bằng các hàm trong `apps/backend/src/modules/realtime/rooms.ts` (ví dụ `Rooms.user(id)`, `Rooms.role(role)`, `Rooms.unit(id)`), không viết chuỗi trực tiếp ở nhiều nơi.
+Tên phòng tạo bằng các hàm trong `backend/src/modules/realtime/rooms.ts` (ví dụ `Rooms.user(id)`, `Rooms.role(role)`, `Rooms.unit(id)`), không viết chuỗi trực tiếp ở nhiều nơi.
 
 Không có phòng theo từng sự cố trong MVP: người xem chi tiết sự cố là OPERATOR/COMMANDER (đã ở phòng vai trò) hoặc RESPONDER (đã ở phòng lực lượng). Thêm phòng `incident:{id}` sau này nếu cần.
 
@@ -57,7 +57,7 @@ Không có phòng theo từng sự cố trong MVP: người xem chi tiết sự 
 
 ### 4.1 Quy ước
 
-- Tên sự kiện: `đối-tượng.hành-động`, chữ thường, ngăn cách bằng dấu chấm. Khai báo hằng số tại `apps/backend/src/modules/realtime/events/socket-events.ts` (phía backend) và sao chép kiểu payload tại `apps/frontend/src/types/socket-events.ts` (phía frontend).
+- Tên sự kiện: `đối-tượng.hành-động`, chữ thường, ngăn cách bằng dấu chấm. Khai báo hằng số tại `backend/src/modules/realtime/events/socket-events.ts` (phía backend) và sao chép kiểu payload tại `frontend/src/types/socket-events.ts` (phía frontend).
 - Mọi payload có hai trường chung: `eventId` (UUID, để client bỏ qua trùng) và `occurredAt` (ISO 8601, UTC).
 - Payload tóm tắt, **không** chứa dữ liệu nhạy cảm. Chi tiết lấy qua REST.
 
@@ -197,7 +197,7 @@ sequenceDiagram
 
 ### 5.1 Sự kiện nội bộ
 
-Dùng chung tên với sự kiện socket để dễ truy vết, khai báo ở `apps/backend/src/common/events/domain-events.ts`:
+Dùng chung tên với sự kiện socket để dễ truy vết, khai báo ở `backend/src/common/events/domain-events.ts`:
 
 ```ts
 export const DomainEvents = {
@@ -272,7 +272,7 @@ Phát bởi tác vụ định kỳ của module `sla` (xem `incident-state-machi
 ### 6.1 Vị trí mã
 
 ```
-apps/web/src/
+frontend/src/
 ├── providers/SocketProvider.tsx          # tạo kết nối, đăng ký lắng nghe
 └── lib/
     ├── socket.ts                         # tạo socket, gắn token

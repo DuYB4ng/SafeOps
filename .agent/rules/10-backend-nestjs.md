@@ -1,6 +1,6 @@
 # Quy tắc 10: Phát triển Backend NestJS (Backend Rules)
 
-**Áp dụng cho:** Thư mục `apps/backend/`.  
+**Áp dụng cho:** Thư mục `backend/`.  
 **Tham chiếu tài liệu:** [`docs/02-architecture/folder-structure.md`](../../docs/02-architecture/folder-structure.md), [`docs/02-architecture/incident-state-machine.md`](../../docs/02-architecture/incident-state-machine.md), [`docs/04-api/api-contract.md`](../../docs/04-api/api-contract.md).
 
 ---

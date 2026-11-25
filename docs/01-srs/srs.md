@@ -144,6 +144,7 @@ Hệ thống định nghĩa 5 vai trò (Role) độc quyền (FR-AUTH-03):
 - **BR-12 (Kiểm soát mức ưu tiên):** Cho phép nâng/hạ mức độ ưu tiên (`priority`) của sự cố trong suốt quá trình xử lý, nhưng bắt buộc lưu vết lý do điều chỉnh vào nhật ký.
 - **BR-13 (Phân loại ban đầu):** Cảnh báo do `REPORTER` tạo ra có thể chưa có mức ưu tiên, hệ thống đưa vào hàng đợi xác minh của Operator.
 - **BR-14 (Cảnh báo tự động):** Cảnh báo nhận qua Webhook tự động có thể mang sẵn gợi ý loại sự cố và mức ưu tiên, nhưng vẫn yêu cầu Operator xác nhận để tạo sự cố chính thức.
+- **BR-15 (Điều phối thủ công theo gợi ý chuyên môn):** Lệnh điều phối luôn do `OPERATOR` hoặc `COMMANDER` chủ động chọn và giao thủ công (hệ thống không tự động điều phối). Hệ thống gợi ý các lực lượng `AVAILABLE` theo thứ tự ưu tiên chuyên môn trong `incident_types.suggested_unit_types` (ví dụ: sự cố `FIRE` ưu tiên gợi ý `FIRE_FIGHTING` trước `SECURITY`/`MEDICAL`) và xếp gần nhất theo Haversine, đồng thời cho phép Operator chọn thủ công bất kỳ lực lượng `AVAILABLE` nào khác khi đội chuyên môn đang bận.
 
 ---
 
@@ -184,8 +185,8 @@ Hệ thống định nghĩa 5 vai trò (Role) độc quyền (FR-AUTH-03):
 - **FR-UNIT-02:** Theo dõi 3 trạng thái khả dụng của lực lượng: `AVAILABLE`, `BUSY`, `OFFLINE`.
 - **FR-UNIT-03:** Cập nhật vị trí ứng trực của lực lượng thủ công hoặc theo vị trí báo cáo gần nhất.
 - **FR-UNIT-04:** `RESPONDER` có thể tự chuyển trạng thái làm việc (vào ca/hết ca) giữa `AVAILABLE` và `OFFLINE`.
-- **FR-DISP-01:** Thuật toán tự động tìm kiếm và xếp hạng lực lượng đề xuất: Lọc theo chuyên môn phù hợp loại sự cố, đang `AVAILABLE`, sắp xếp tăng dần theo cự ly Haversine.
-- **FR-DISP-02:** `OPERATOR` phân công 1 hoặc nhiều lực lượng đến hiện trường kèm chỉ dẫn tác chiến.
+- **FR-DISP-01:** Thuật toán tìm kiếm và xếp hạng lực lượng gợi ý: Lọc các lực lượng đang `AVAILABLE`, ưu tiên theo thứ tự chuyên môn phù hợp cấu hình cho loại sự cố (ví dụ: sự cố cháy `FIRE` ưu tiên `FIRE_FIGHTING` trước các lực lượng hỗ trợ) và sắp xếp tăng dần theo cự ly Haversine.
+- **FR-DISP-02:** `OPERATOR`/`COMMANDER` **điều phối thủ công** — chủ động chọn 1 hoặc nhiều lực lượng đang `AVAILABLE` (từ danh sách gợi ý hoặc chọn thủ công bất kỳ lực lượng `AVAILABLE` nào khác khi đội chuyên môn đang bận) để giao lệnh kèm chỉ dẫn tác chiến; hệ thống không tự động gán lệnh.
 - **FR-DISP-03:** Mỗi lệnh điều phối có quy trình phản hồi riêng: `ASSIGNED` → `ACCEPTED` (hoặc `DECLINED`) → `EN_ROUTE` → `ON_SCENE` → `DONE`.
 - **FR-DISP-04:** `RESPONDER` có màn hình "Việc của tôi" (`my-tasks`) để tiếp nhận lệnh, xem chỉ dẫn và vị trí cần đến.
 - **FR-DISP-05:** `RESPONDER` gửi báo cáo kết quả hiện trường, đính kèm hình ảnh hoàn thành nhiệm vụ.
@@ -281,7 +282,7 @@ sequenceDiagram
 | FR-ALERT-01 → 08 | BR-02, BR-10, BR-13, 14 | `alerts`, `alert_attachments` | `/api/v1/alerts/*` | `features/reports`, `features/alerts` |
 | FR-INC-01 → 09 | BR-01, 03, 04, 05, 12 | `incidents`, `incident_attachments`, `incident_logs` | `/api/v1/incidents/*` | `features/incidents` |
 | FR-UNIT-01 → 04 | BR-06, BR-07 | `units` | `/api/v1/units/*` | `features/units` |
-| FR-DISP-01 → 06 | BR-05, BR-07, BR-08, 11 | `dispatches`, `dispatch_attachments` | `/api/v1/dispatches/*` | `features/dispatch`, `features/my-tasks` |
+| FR-DISP-01 → 06 | BR-05, BR-07, BR-08, 11, 15 | `dispatches`, `dispatch_attachments` | `/api/v1/dispatches/*` | `features/dispatch`, `features/my-tasks` |
 | FR-MAP-01 → 05 | BR-11 | `incidents`, `units` | `/api/v1/incidents`, `/api/v1/units` | `features/map` |
 | FR-RT-01, 02 | BR-09 | — (In-memory WebSocket) | Gateway Socket.IO | `providers/SocketProvider` |
 | FR-DASH-01 → 03 | — | Đọc thống kê tổng hợp | `/api/v1/statistics/*` | `features/statistics` |

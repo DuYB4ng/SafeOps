@@ -1,6 +1,6 @@
 # Quy tắc 50: An ninh & Kiểm soát Quyền truy cập RBAC (Security Rules)
 
-**Áp dụng cho:** Thư mục `apps/backend/src/common/guards/`, `modules/auth/`, và `modules/uploads/`.  
+**Áp dụng cho:** Thư mục `backend/src/common/guards/`, `modules/auth/`, và `modules/uploads/`.  
 **Tham chiếu tài liệu:** [`docs/00-requirements/roles-permissions.md`](../../docs/00-requirements/roles-permissions.md), [`docs/01-srs/srs.md`](../../docs/01-srs/srs.md).
 
 ---

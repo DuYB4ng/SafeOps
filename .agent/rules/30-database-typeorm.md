@@ -1,6 +1,6 @@
 # Quy tắc 30: Thiết kế & Quản trị Cơ sở Dữ liệu TypeORM (Database Rules)
 
-**Áp dụng cho:** Thư mục `apps/backend/src/database/` và các file `*.entity.ts`.  
+**Áp dụng cho:** Thư mục `backend/src/database/` và các file `*.entity.ts`.  
 **Tham chiếu tài liệu:** [`docs/03-database/erd.md`](../../docs/03-database/erd.md), [`docs/02-architecture/folder-structure.md`](../../docs/02-architecture/folder-structure.md).
 
 ---

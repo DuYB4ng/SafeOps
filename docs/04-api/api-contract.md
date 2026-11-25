@@ -497,7 +497,7 @@ Xác nhận cảnh báo và chuyển thành sự cố:
 ### 4.4 Module Units & Dispatch
 
 #### `GET /api/v1/units/suggestions?incidentId=...`
-Lấy danh sách lực lượng phù hợp (đúng loại, đang `AVAILABLE`, sắp xếp theo khoảng cách Haversine):
+Lấy danh sách lực lượng phù hợp để điều phối thủ công (lọc `AVAILABLE`, ưu tiên theo thứ tự chuyên môn trong `incident_types.suggested_unit_types` — ví dụ sự cố `FIRE` ưu tiên `FIRE_FIGHTING` trước `SECURITY`/`MEDICAL` — sau đó sắp xếp tăng dần theo khoảng cách Haversine):
 - **Response `200 OK`:**
 ```json
 {
@@ -526,8 +526,10 @@ Lấy danh sách lực lượng phù hợp (đúng loại, đang `AVAILABLE`, s�
   ]
 }
 ```
+*(Ghi chú: Nếu các lực lượng gợi ý đều đang bận hoặc cần chọn ngoài chuyên môn gợi ý, Frontend dùng `GET /api/v1/units?status=AVAILABLE` để Operator chọn thủ công từ toàn bộ lực lượng sẵn sàng).*
 
 #### `POST /api/v1/dispatches`
+Giao lệnh điều phối **thủ công** cho 1 lực lượng đang `AVAILABLE` (hệ thống không tự động điều phối; Backend không bắt buộc trùng loại lực lượng gợi ý):
 - **Request Body:**
 ```json
 {
