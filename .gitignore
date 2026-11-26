@@ -1,8 +1,11 @@
 node_modules/
 .next/
+frontend/next-env.d.ts
 dist/
 build/
 coverage/
+playwright-report/
+test-results/
 .cache/
 *.tsbuildinfo
 *.log

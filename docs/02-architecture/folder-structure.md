@@ -23,6 +23,10 @@ SafeOps/
 ├── AGENTS.md                     # bản đồ dự án cho AI agent (xem ghi chú bên dưới)
 ├── README.md                     # cách chạy backend và frontend
 ├── .gitignore
+├── package.json                  # tooling dùng chung, pnpm workspace
+├── pnpm-workspace.yaml           # backend/ và frontend/
+├── pnpm-lock.yaml                # lockfile chung
+├── eslint.config.mjs             # cấu hình nền cho repo
 ├── backend/                      # NestJS, tự chạy docker compose riêng
 ├── frontend/                     # Next.js, tự chạy docker compose riêng
 └── docs/
@@ -167,6 +171,8 @@ Với các module có bảng chuyển trạng thái, file `*-transitions.ts` n�
 
 Theo cách tổ chức phổ biến của Next.js App Router: thư mục `app/` chỉ chứa **route và layout**, phần còn lại chia theo tính năng ở `features/`.
 
+Cây dưới đây là kiến trúc đích của toàn bộ sản phẩm; các module nghiệp vụ được tạo theo từng task. Cây thực tế đã tổ chức cho M0-19 được mô tả tại mục 4.7.
+
 ```
 frontend/
 ├── src/
@@ -177,8 +183,9 @@ frontend/
 │   │   ├── (auth)/
 │   │   │   ├── login/page.tsx
 │   │   │   └── register/page.tsx
-│   │   └── (app)/                           # khu vực sau đăng nhập
-│   │       ├── layout.tsx                   # sidebar, header
+│   │   └── (dashboard)/                     # khu vực ứng dụng
+│   │       ├── layout.tsx                   # CSS nhóm; AppShell theo task layout
+│   │       ├── page.tsx                     # / — Dashboard hiện tại
 │   │       ├── dashboard/page.tsx
 │   │       ├── reports/                     # REPORTER
 │   │       │   ├── page.tsx                 # báo cáo của tôi
@@ -217,8 +224,12 @@ frontend/
 │   │   ├── layout/                          # Sidebar, Header, ConnectionBadge
 │   │   └── common/                          # EmptyState, LoadingState, ConfirmDialog, ReasonDialog
 │   │
+│   ├── services/                           # I/O, API dùng chung
+│   │   ├── incident-export.service.ts       # xuất CSV từ danh sách sự cố
+│   │   └── api-client.ts                    # M1-13: token, làm mới khi gặp 401
+│   ├── hooks/                              # hook dùng chung, độc lập feature
+│   │   └── useKeyboardShortcut.ts
 │   ├── lib/
-│   │   ├── api-client.ts                    # gắn token, làm mới khi gặp 401
 │   │   ├── socket.ts                        # tạo kết nối socket.io-client
 │   │   ├── query-client.ts
 │   │   ├── query-keys.ts                    # khóa TanStack Query dùng chung
@@ -230,8 +241,10 @@ frontend/
 │   │
 │   ├── providers/                           # QueryProvider, AuthProvider, SocketProvider
 │   ├── stores/                              # Zustand: bộ lọc bản đồ, sự cố đang chọn, trạng thái kết nối
-│   ├── types/                               # bản sao enum và kiểu dữ liệu từ backend
+│   ├── types/                               # enum, API contract và kiểu dữ liệu chia sẻ
 │   │   ├── enums.ts
+│   │   ├── auth.ts                          # kiểu dữ liệu form xác thực
+│   │   ├── incidents.ts                     # view model sự cố mẫu
 │   │   ├── api.ts                           # kiểu response, phân trang, lỗi
 │   │   └── socket-events.ts                 # kiểu payload sự kiện socket
 │   └── middleware.ts                        # chặn route khi chưa đăng nhập
@@ -256,7 +269,7 @@ features/incidents/
 ├── components/        # IncidentTable, IncidentFilters, IncidentDetail, StatusBadge, Timeline
 ├── hooks/             # useIncidents, useIncident, useChangeIncidentStatus
 ├── schemas.ts         # Zod cho form
-└── api.ts             # các hàm gọi REST của nghiệp vụ này
+└── api.ts             # tùy chọn: API riêng feature, dùng services/api-client
 ```
 
 ### 4.2 Quy tắc giữ code gọn
@@ -267,7 +280,8 @@ features/incidents/
 4. Một feature **không import trực tiếp** từ feature khác. Phần dùng chung đưa lên `components/common` hoặc `lib/`.
 5. `permissions.ts` chỉ để ẩn/hiện menu và nút. Quyền thật do backend kiểm tra.
 6. Nút hành động trên sự cố hiển thị theo `allowedActions` backend trả về, không tự viết luật chuyển trạng thái.
-7. `src/types/` là bản sao; khi backend đổi enum hay payload thì cập nhật ở đây cùng lúc.
+7. Kiểu API trong `src/types/` đồng bộ từ backend; khi backend đổi enum hay payload thì cập nhật cùng lúc. Kiểu form và view model được định nghĩa riêng, không coi là DTO của backend.
+8. `src/services/` tập trung I/O dùng chung (API, xuất file), không import từ `features/` hoặc `components/`. `src/hooks/` chỉ chứa hook dùng chung; hook có nghiệp vụ nằm trong `features/<feature>/hooks/`. Kiểu dữ liệu chia sẻ nằm trong `src/types/`; kiểu props riêng của một component có thể đặt cùng component.
 
 ### 4.3 Route theo vai trò
 
@@ -287,6 +301,121 @@ features/incidents/
 Chi tiết quyền ở [`roles-permissions.md`](../00-requirements/roles-permissions.md).
 
 ---
+
+### 4.4 Bộ UI theo Figma (M0-18)
+
+Nguồn thiết kế: [SafeOps UI/UX](https://www.figma.com/design/WQxeppTQRrMD9dYijJctmV/SafeOps-UI-UX), gồm `01-Foundation` (`2:20`), `Display` (`38:2`) và `02-Components` (`2:21`).
+
+- `src/app/globals.css`: token màu, typography Inter, kích thước, bo góc từ Figma và theme Tailwind/shadcn.
+- `src/components/ui/`: primitives shadcn có theme SafeOps (Button, Input, Select, Badge, Dialog, Table, Toast).
+- `src/components/layout/`: `Sidebar`, `Header`, `ConnectionBadge`; nhận trạng thái và callback qua props.
+- `src/components/common/`: `ConnectionBanner`, `SeverityBadge`, `IncidentStatusBadge`, `DispatchDialog`, `IncidentQueueTable`. Modal nhận danh sách đơn vị từ bên gọi, không tự tính khoảng cách hay quyết định chuyển trạng thái.
+- `src/features/design-system/`: dữ liệu mẫu và trang xem thử tại `/components`, truy cập trực tiếp cho phát triển; Dashboard không hiển thị liên kết đến thư viện trong sidebar hoặc trợ giúp. Dữ liệu mẫu chỉ dùng để kiểm tra giao diện, không gửi API và không mô phỏng kết nối Socket thật.
+- `src/features/statistics/`: trang Dashboard tại `/` và `/dashboard`, gồm dữ liệu mẫu, thẻ KPI, sơ đồ điều hành, phân bố khu vực/SLA và bảng sự cố. Route chỉ import component của feature.
+
+Thông số đã đọc trực tiếp từ Figma: font Inter; màu primary `#2563EB`; chữ chính `#0F172A`; chữ phụ `#475569`; border `#E2E8F0`; sidebar 256px, nền `#475569`, padding 16px/24px; header 64px; banner 40px; badge 100×25px, font 12/16px; modal 480px, padding 24px, radius 12px.
+
+Badge giữ nguyên 9 kiểu hiển thị của Figma: `CANCELED`, `RESOLVED`, `PROCESSING`, `ASSIGNED`, `PENDING`, `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`. Đây là **visual variants**, không phải enum nghiệp vụ. `IncidentStatusBadge` nhận trạng thái API hiện tại: `NEW`/`CONFIRMED` dùng màu pending, `DISPATCHED` dùng màu assigned, `IN_PROGRESS` dùng màu processing, `RESOLVED`/`CLOSED` dùng màu resolved, `CANCELLED` dùng màu canceled; chữ vẫn phản ánh trạng thái thật. Các nút nghiệp vụ của `DispatchDialog` hiển thị theo `allowedActions` do bên gọi cung cấp.
+
+Figma MCP đã trả thiết kế chi tiết và ảnh đối chiếu cho Badge (`13:3`), Sidebar (`13:29`), Header (`14:34`), Banner (`14:38`), Modal (`25:78`) và Heading 1 (`3:25`). Table (`25:43`) được đối chiếu theo ảnh người dùng cung cấp sau khi MCP hết hạn mức: khung 1184×204px, radius 8px, nền trắng, padding ngoài 0, 4 hàng cao 51px, không có header hiển thị. Thứ tự cột: mã, tiêu đề, badge mức độ, badge trạng thái, thời gian và nút `Xác minh & Giao việc`. Khoảng cách cột và cỡ chữ được ước lượng theo ảnh; chưa đọc được giá trị từng cell từ MCP. Header vẫn có trong HTML ở dạng chỉ dành cho trình đọc màn hình. Bảng cuộn ngang trong vùng riêng trên màn hình hẹp.
+
+`IncidentQueueTable` nhận dữ liệu và `allowedActions` từ bên gọi; chỉ hiện nút khi có `CONFIRM` hoặc `DISPATCH` và callback xử lý. Callback mở modal với đúng dòng được chọn; component không gọi API hoặc tự chuyển trạng thái. Thời gian ISO UTC được hiển thị theo `Asia/Ho_Chi_Minh`. Trong trang mẫu, 4 dòng lặp lại nội dung ảnh (`#INC-001`, `Báo cháy tầng hầm B2`, `CRITICAL`, `PENDING`, `10:45 - 09/11/2026`), mỗi dòng có ID mẫu riêng. `PENDING` chỉ là nhãn minh họa Figma qua render prop; trạng thái API của dữ liệu mẫu vẫn là `CONFIRMED`.
+
+Nội dung page Display mới được kiểm tra ở mức cấu trúc, chưa xác nhận khớp hình ảnh các màn hình.
+
+### 4.5 Dashboard theo CSS người dùng cung cấp
+
+Nguồn bổ sung: file `Pasted text.txt` có frame `Admin Dashboard` (1280×1983px), do người dùng gửi. Bố cục dùng nền `#FAF8FF`, surface trắng, border `#C3C6D7`, primary `#004AC6`; header 56px, banner 33px, sidebar 256px, nội dung padding/gap 20px. Dashboard dùng CSS riêng có phạm vi, giữ nguyên token và giao diện mặc định của thư viện `/components`. Header/Sidebar có biến thể dashboard và slot nội dung; Badge, Button, Table, ConnectionBadge, ConnectionBanner, DispatchDialog tiếp tục dùng chung. Theo yêu cầu cập nhật của người dùng, Dashboard bỏ khối xem thử điều phối nhúng và nút dẫn đến khối đó; thao tác trên từng hàng sự cố vẫn mở `DispatchDialog`.
+
+File CSS có hình học và một số tên layer, thiếu phần lớn nội dung text, dữ liệu và đường vector. Nội dung còn thiếu được bổ sung bằng fixture minh họa; sơ đồ SVG tái hiện blueprint và pin, không phải Leaflet hay bản đồ địa lý thật. Layer, zoom, chọn pin, tìm kiếm, lọc, xuất CSV và xem chi tiết hoạt động cục bộ. Không gọi API, không mở socket, không gửi lệnh hay thay đổi dữ liệu nghiệp vụ.
+
+Tên frame `Admin Dashboard` là tên thiết kế, không cấp quyền nghiệp vụ cho vai trò `ADMIN`. Profile mẫu theo CSS là `COMMANDER` (SOC Lead Commander); `allowedActions` trong fixture điều khiển nút điều phối của bản xem thử. Khi tích hợp xác thực/API, `ADMIN` chỉ đọc sự cố và không được điều phối theo ma trận quyền; backend vẫn kiểm tra quyền. Không suy diễn quyền từ tên trang. Trạng thái API được giữ trong dữ liệu; nhãn PROCESSING/ASSIGNED/PENDING chỉ dùng làm visual variant tương ứng trên bản thiết kế.
+
+Trang Dashboard responsive: thu gọn sidebar trên mobile, KPI chia 2/1 cột, map và phân bố xếp dọc, bảng cuộn trong vùng riêng. Không ép chiều cao 1983px khi nội dung hoặc viewport thay đổi. Bộ công cụ M0-10 (ESLint, Prettier, Husky, lint-staged, pnpm workspace) giữ nguyên.
+
+Frontend dùng pnpm workspace và lockfile gốc; Dockerfile tương lai phải truy cập được các file gốc cần thiết. Chạy local bằng `pnpm --dir frontend dev`; kiểm tra bằng `pnpm lint`, `pnpm --dir frontend typecheck`, `pnpm --dir frontend build`. Docker chưa được khởi tạo trong phần việc UI này.
+
+---
+
+### 4.6 Giao diện đăng nhập / đăng ký
+
+Nguồn: CSS frame `Xác thực tài khoản` (1280×1062px) do người dùng gửi, nền `#F0F6FD`, font Inter, header/footer padding ngang 48px, nội dung hai cột cách 56px. Cột giới thiệu có headline 38/46px và 3 thẻ tính năng tối đa 576px; thẻ đăng ký khoảng 461px, padding 36px, radius 16px, input 42px, nút chính 48px. Trang đăng nhập dùng cùng bố cục và ngôn ngữ hình ảnh; nội dung chữ chưa có trong CSS được bổ sung theo nghiệp vụ SafeOps.
+
+- Route mỏng `src/app/(auth)/login/page.tsx` và `register/page.tsx`, layout auth dùng CSS có phạm vi trong `src/features/auth/auth.css`.
+- `src/features/auth/components/`: khung giới thiệu, form chung và trường mật khẩu. Dùng Button, Input, Label, Dialog hiện có; không thay đổi Dashboard hoặc thư viện component.
+- `src/features/auth/validation.ts`: kiểm tra email, họ tên, số điện thoại tùy chọn (ERD cho phép null), mật khẩu đăng ký tối thiểu 8 ký tự có số và ký tự đặc biệt theo file thiết kế, đồng ý điều khoản. Mật khẩu đăng nhập chỉ kiểm tra bắt buộc, không áp chính sách tạo mật khẩu lên tài khoản hiện hữu.
+- Đăng ký công khai tương ứng `REPORTER` (FR-AUTH-04), không có lựa chọn tự cấp vai trò. Backend hiện chưa có module auth; submit chỉ kiểm tra form và báo rõ chưa đăng nhập/tạo tài khoản. Không lưu mật khẩu, token hoặc thông tin form vào browser storage, không giả lập phiên đăng nhập và không chuyển Dashboard sau submit.
+- Google Workspace, quên mật khẩu và nội dung điều khoản chưa có hợp đồng API/cấu hình; giao diện mở thông tin hỗ trợ, không mô phỏng đăng nhập SSO hoặc gửi email đặt lại mật khẩu. Khi tích hợp backend, dùng API Auth và TanStack Query theo quy chuẩn dự án; backend tiếp tục kiểm tra dữ liệu và quyền.
+- Mobile ưu tiên form trước cột giới thiệu; hỗ trợ bàn phím, nhãn trường, lỗi liên kết qua `aria-describedby`, ẩn/hiện mật khẩu và chuyển giữa `/login` / `/register`.
+
+### 4.7 Route group (M0-19)
+
+Task M0-19 yêu cầu đủ sáu tầng `app`, `features`, `components`, `services`, `hooks`, `types`. Cây hiện thực sau khi hoàn thiện phần tổ chức kiến trúc:
+
+```text
+src/
+├── app/
+│   ├── (auth)/                  # layout, login/page, register/page
+│   ├── (dashboard)/             # layout, page (/), dashboard/page
+│   └── components/page.tsx      # thư viện UI cho phát triển
+├── features/
+│   ├── auth/
+│   │   ├── components/
+│   │   ├── hooks/useAuthForm.ts
+│   │   ├── validation.ts
+│   │   └── auth.css
+│   ├── statistics/
+│   │   ├── components/
+│   │   ├── hooks/useIncidentFilters.ts
+│   │   ├── fixtures.ts
+│   │   └── dashboard.css
+│   ├── reports/                 # components, hooks, fixtures, validation, reporter.css
+│   ├── map/                     # Leaflet, danh sách, bộ lọc, popup, fixture
+│   └── design-system/           # components, fixtures
+├── components/                 # ui, common, layout
+├── services/                   # incident-export, image-attachments, report-draft, geolocation
+├── hooks/                      # useKeyboardShortcut, useImageAttachments
+├── types/                      # auth, incidents, reports, uploads, map, geo, api, enums, ui
+└── lib/                        # utils, search, map/geometry
+```
+
+`useAuthForm` quản lý state, validation, submit và focus lỗi của form mẫu; component giữ phần hiển thị. `useIncidentFilters` quản lý tìm kiếm/lọc trong dữ liệu fixture. `useKeyboardShortcut` gom cơ chế phím tắt dùng chung. `incident-export.service` nhận dữ liệu qua type chung, tạo/tải CSV và thu hồi Object URL; component không trực tiếp thao tác Blob/DOM tải file. Các phần này được sử dụng trong giao diện hiện tại, không tạo thư mục rỗng.
+
+`types/api.ts` mô tả response đơn, phân trang và lỗi theo API contract. Type của form auth và view model Dashboard được tách khỏi `validation.ts`/`fixtures.ts`. Enum API giữ nguyên. `services/api-client.ts`, interceptor refresh token, Auth Store và tích hợp API thuộc M1-13, chưa triển khai trong M0-19.
+
+- Root `app/layout.tsx` giữ HTML/body, Inter, `globals.css` và Toaster.
+- `app/(auth)/layout.tsx` dùng `AuthShell` và import `features/auth/auth.css`; chứa `/login`, `/register`.
+- `app/(dashboard)/layout.tsx` import `features/statistics/dashboard.css`; chứa `/` tại `(dashboard)/page.tsx` và `/dashboard` tại `(dashboard)/dashboard/page.tsx`. Hai page chỉ gọi `AdminDashboard`, giữ nguyên URL và nội dung.
+- `app/components/page.tsx` nằm ngoài hai nhóm, tiếp tục phục vụ trang phát triển `/components` và dùng CSS chung.
+- Tên group không xuất hiện trong URL. Mỗi URL có đúng một file page; không giữ bản sao tại `app/page.tsx` hoặc `app/dashboard/page.tsx` sau khi di chuyển.
+- Phân tách group là tổ chức layout và mã nguồn. API/Auth hiện chưa tích hợp; bảo vệ route và AppShell theo vai trò được triển khai trong các task xác thực/layout tiếp theo. Sidebar/Header hiện do `AdminDashboard` quản lý để tránh lặp giao diện.
+
+### 4.8 Giao diện Reporter theo ba file CSS Figma
+
+Nguồn người dùng cung cấp: frame `Trang chủ/Web` (1280×1441), `Bổ sung chi tiết` (1280×1768.5), `Tạo báo cáo` (1280×1340.42). Trang danh sách có sidebar 256px, header 56px, hero đỏ, 4 thẻ thống kê, bộ lọc và 3 card/trang. Trang tạo/chi tiết dùng header rộng, nội dung hai cột, nền sáng, card radius 12px, badge 100×25px. CSS có phạm vi `.reporter-*`; giữ Dashboard và bộ UI hiện tại.
+
+- Route mỏng trong `app/(dashboard)/reports/`: `layout.tsx` dùng `ReporterShell`, `page.tsx` cho danh sách, `new/page.tsx` cho tạo báo cáo, `[id]/page.tsx` cho chi tiết và bổ sung. Layout dùng sidebar cho danh sách, header rộng cho trang con như file thiết kế. Đây là bố cục UI, chưa là phân quyền.
+- `features/reports/`: components, hooks, fixture, validation, CSS và trình bày trạng thái. Types tại `types/reports.ts`, `types/uploads.ts`; hook ảnh dùng chung tại `hooks/useImageAttachments.ts`; service chọn ảnh/nháp tại `services/`.
+- Dữ liệu là fixture của một Reporter mẫu. Tìm kiếm hỗ trợ tiếng Việt không dấu, lọc trạng thái/loại/ngày, phân trang và xem chi tiết. `allowedActions` mẫu điều khiển bổ sung/đánh giá, không suy diễn quyền từ status. Backend sau này phải áp phạm vi `own`; UI chưa gọi API.
+- Nhãn PENDING/PROCESSING/ASSIGNED là trình bày Figma; enum nghiệp vụ hiện tại được giữ nguyên. Mức độ trên form là đề xuất hỗ trợ của người báo cáo, không ấn định priority chính thức (BR-13). Chưa thêm trường/endpoint API ngoài hợp đồng hiện hành.
+- Bổ sung minh chứng và đánh giá xuất hiện trong thiết kế nhưng hợp đồng API hiện chưa mô tả thao tác tương ứng cho Reporter. Bản UI chỉ kiểm tra nội dung và hiển thị phản hồi mẫu, không sửa sự cố/nhật ký hoặc gửi đến SOC. Bổ sung API/RBAC phải là phần việc riêng khi tích hợp.
+- Chỉ ảnh JPEG/PNG/WebP, tối đa 5 ảnh và 5MB/ảnh theo BR-10, không nhận video như một số label trong CSS. File được chọn chỉ xem trước bằng Object URL, thu hồi khi xóa/unmount; không hiển thị tiến độ upload giả. Backend phải kiểm tra lại nội dung file khi tích hợp.
+- Lưu/khôi phục nháp là thao tác chủ động trong sessionStorage, chỉ lưu nội dung và vị trí, không lưu file ảnh. Submit hợp lệ mở bản kiểm tra thông tin và thông báo rõ chưa gửi thật. GPS chỉ được gọi khi người dùng bấm định vị; xử lý từ chối/timeout. Sơ đồ khuôn viên và thumbnail là SVG minh họa vì CSS không chứa asset gốc; chưa thay thế Leaflet của FR-ALERT-01.
+- Chi tiết bỏ số điện thoại người báo cáo theo BR-09. Hotline chưa cấu hình nên hiển thị hướng dẫn liên hệ đơn vị, không dùng số điện thoại giả. Màn hình mobile xếp cột dọc và thu gọn sidebar.
+
+### 4.9 Bản đồ OPERATOR theo CSS Figma
+
+Nguồn: file CSS frame `Bản đồ leaflet` (1280×1024), sidebar 240px, danh sách 370px và canvas bản đồ 670px, giao diện chiến thuật tối. Route `/map` tại `app/(dashboard)/map/page.tsx` gọi màn hình trong `features/map/`. Module gồm components, hooks, fixture, trình bày trạng thái và CSS có phạm vi `operator-map-*`; type dùng chung tại `types/map.ts`, hàm gom cụm/lọc không phụ thuộc React tại `lib/map/`.
+
+Leaflet 1.9.4 stable được import bằng `next/dynamic` với `ssr: false` trong Client Component. Khởi tạo map trong effect, hủy map/layer/listener/ResizeObserver khi unmount. Canvas dùng Leaflet thật cho pan, zoom, fit bounds, marker và gom cụm theo khoảng cách pixel; số đếm cụm lấy từ fixture thật đang hiển thị. Tâm mặc định TP.HCM `[10.7625, 106.6600]`. Zoom lớn tách cụm để truy cập từng marker.
+
+Nền chiến thuật là SVG khuôn viên minh họa được georeference trên Leaflet; chế độ tối giản dùng cùng sơ đồ với màu sáng, không phải ảnh vệ tinh. Chế độ đường phố dùng tile OpenStreetMap qua HTTPS và giữ attribution; có phản hồi khi tile không tải được. Chỉ đường phố cần truy cập tile ngoài, chế độ chiến thuật không phụ thuộc mạng.
+
+Tìm kiếm không dấu, lọc ưu tiên/loại/trạng thái/bán kính, chuyển danh sách sự cố/lực lượng, chọn card hoặc marker và bật/tắt lớp lực lượng hoạt động trên fixture. Bán kính dùng khoảng cách địa lý để lọc giao diện, không dùng để suy diễn gợi ý điều phối. Gợi ý lực lượng/khoảng cách là dữ liệu mẫu do bên gọi cung cấp; tích hợp thật phải dùng API gợi ý từ backend. Nhãn PENDING/ASSIGNED/PROCESSING là visual variant, enum API không đổi. Nút điều phối hiển thị theo `allowedActions`, dùng lại `DispatchDialog`; hủy yêu cầu lý do. Không gửi lệnh, không chuyển trạng thái thật, không mở Socket.IO hoặc giả lập thông báo đã phát từ SOC.
+
+Sidebar chỉ hiển thị chức năng của OPERATOR, không cấp menu quản trị tài khoản/danh mục của ADMIN dù CSS có tên mục này. Xác thực và guards backend còn thuộc phần tích hợp. Mobile thu gọn sidebar và chuyển giữa danh sách/bản đồ; popup co thành thẻ dưới bản đồ, container tự cập nhật kích thước khi đổi chế độ. Dashboard và Reporter giữ nguyên màn hình đã có.
+
+Mục Bản đồ trực tuyến trong sidebar Dashboard dẫn đến `/map`; khối sơ đồ minh họa trên Dashboard vẫn giữ nguyên.
 
 ## 5. Docker: mỗi bên tự chạy riêng
 
@@ -309,11 +438,11 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
       interval: 5s
       timeout: 5s
       retries: 10
@@ -323,11 +452,11 @@ services:
       context: .
       target: development
     ports:
-      - "3001:3001"
+      - '3001:3001'
     env_file: .env
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
-      CHOKIDAR_USEPOLLING: "true" # hot reload ổn định trên Windows
+      CHOKIDAR_USEPOLLING: 'true' # hot reload ổn định trên Windows
     volumes:
       - .:/app
       - /app/node_modules
@@ -349,10 +478,10 @@ services:
       context: .
       target: development
     ports:
-      - "3000:3000"
+      - '3000:3000'
     env_file: .env
     environment:
-      WATCHPACK_POLLING: "true" # hot reload ổn định trên Windows
+      WATCHPACK_POLLING: 'true' # hot reload ổn định trên Windows
     volumes:
       - .:/app
       - /app/node_modules

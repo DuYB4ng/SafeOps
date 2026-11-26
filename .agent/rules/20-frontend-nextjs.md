@@ -13,7 +13,7 @@ Tuân thủ nguyên tắc **Feature-Driven Architecture** kết hợp Next.js Ap
 src/
 ├── app/                  # CHỈ chứa route và layout mỏng
 │   ├── (auth)/login/page.tsx
-│   └── (app)/incidents/[id]/page.tsx
+│   └── (dashboard)/incidents/[id]/page.tsx
 ├── features/             # CHỨA TOÀN BỘ logic theo từng phân hệ nghiệp vụ
 │   ├── auth/
 │   ├── alerts/
@@ -25,15 +25,21 @@ src/
 │   ├── ui/
 │   ├── layout/
 │   └── common/
-├── lib/                  # api-client, query-keys, utils
+├── services/             # dịch vụ I/O dùng chung; API client ở task M1-13
+├── hooks/                # hook React dùng chung, không phụ thuộc feature
+├── lib/                  # query-keys, utils và cấu hình thư viện
 ├── providers/            # QueryProvider, AuthProvider, SocketProvider
 ├── stores/               # Zustand stores cho UI state
 └── types/                # Types/Interfaces đồng bộ từ API Contract
 ```
 
+**Route group:** `(auth)` chứa màn hình xác thực; `(dashboard)` chứa khu vực ứng dụng. Root layout quản lý CSS chung, font và provider; CSS riêng của nhóm được import trong layout của nhóm. Tên route group không xuất hiện trong URL.
+
 ### Quy tắc bất di bất dịch:
+
 1. **`app/**/page.tsx` phải cực kỳ mỏng:** Tuyệt đối không viết logic fetch API, form state hay tính toán dữ liệu trong `page.tsx`. `page.tsx` chỉ import Component từ `features/` và truyền params.
 2. **Không import chéo giữa các feature:** `features/incidents` không import trực tiếp từ `features/dispatch`. Nếu có component/hàm dùng chung, đưa lên `components/common/` hoặc `lib/`.
+3. **Sáu tầng M0-19:** `app`, `features`, `components`, `services`, `hooks`, `types` có trách nhiệm riêng. `services` thực hiện I/O và dùng type từ `types`, không import component hay feature. Hook dùng chung ở `src/hooks`, hook nghiệp vụ ở `features/<feature>/hooks`. `lib` bổ trợ tiện ích thuần/cấu hình, không thay thế `services` hoặc `hooks`.
 
 ---
 
@@ -46,7 +52,7 @@ features/incidents/
 ├── components/           # IncidentTable.tsx, IncidentDetail.tsx, StatusBadge.tsx, IncidentTimeline.tsx
 ├── hooks/                # useIncidents.ts, useIncident.ts, useIncidentMutations.ts
 ├── schemas.ts            # Schema Zod cho validation form
-└── api.ts                # Các hàm gọi REST API (axios/fetch)
+└── api.ts                # Tùy chọn: API riêng feature, dùng services/api-client
 ```
 
 ---
@@ -78,11 +84,13 @@ features/incidents/
    Backend luôn trả về trường `allowedActions: string[]` (ví dụ: `["ACCEPT", "DECLINE"]` hoặc `["DISPATCH", "CANCEL"]`).
 2. **Render nút hành động dựa trên `allowedActions`:**
    ```tsx
-   {incident.allowedActions.includes('CANCEL') && (
-     <Button variant="destructive" onClick={() => openReasonDialog('CANCEL')}>
-       Hủy sự cố
-     </Button>
-   )}
+   {
+     incident.allowedActions.includes('CANCEL') && (
+       <Button variant="destructive" onClick={() => openReasonDialog('CANCEL')}>
+         Hủy sự cố
+       </Button>
+     );
+   }
    ```
 3. **Các hành động yêu cầu lý do (BR-02):**  
    Khi bấm nút hủy/thu hồi/từ chối, bắt buộc mở `ReasonDialog` để người dùng nhập lý do trước khi gửi API.
@@ -95,10 +103,10 @@ features/incidents/
    ```tsx
    import dynamic from 'next/dynamic';
 
-   const IncidentMap = dynamic(
-     () => import('@/features/map/components/IncidentMap'),
-     { ssr: false, loading: () => <MapSkeleton /> }
-   );
+   const IncidentMap = dynamic(() => import('@/features/map/components/IncidentMap'), {
+     ssr: false,
+     loading: () => <MapSkeleton />,
+   });
    ```
 2. Mọi component Leaflet đều phải có khai báo `"use client"` ở đầu file.
 3. Tọa độ tâm bản đồ mặc định đặt theo khu vực TP.HCM (`[10.7625, 106.6600]`).
