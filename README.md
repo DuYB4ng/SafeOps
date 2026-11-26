@@ -71,7 +71,8 @@ Mật khẩu chung cho môi trường phát triển: `{Role}@123`
 ### Yêu cầu tiên quyết:
 
 - Đã cài đặt **Docker** và **Docker Compose**
-- Hoặc cài đặt **Node.js 20+** và **pnpm** (`npm install -g pnpm`)
+- **Node.js 24.x** và **pnpm 10.x** để chạy các công cụ phát triển dùng chung.
+- Nếu máy có Corepack nhưng chưa có lệnh `pnpm`, dùng `corepack pnpm` thay cho `pnpm` trong các lệnh bên dưới.
 
 ### Khởi chạy với Docker:
 
@@ -84,3 +85,31 @@ docker compose up --build
 cd frontend
 docker compose up --build
 ```
+
+---
+
+## 6. Công cụ phát triển dùng chung (M0-10)
+
+Repo sử dụng **pnpm workspace**, với `backend/` và `frontend/` là hai package ứng dụng. Các công cụ ESLint, Prettier, Husky và lint-staged được quản lý tại thư mục gốc; mỗi ứng dụng sẽ có `package.json` riêng khi khởi tạo NestJS/Next.js. Commit `pnpm-lock.yaml` để cả nhóm cài cùng phiên bản dependency.
+
+Chạy tại thư mục gốc sau khi clone:
+
+```bash
+pnpm install --frozen-lockfile
+```
+
+Script `prepare` tự cài Git hooks qua Husky. Khi commit, hook `pre-commit` gọi lint-staged để chạy ESLint và Prettier trên các file đã stage. Lỗi ESLint chưa sửa được sẽ chặn commit; các thay đổi tự sửa được cập nhật vào phần đã stage. Hook hỗ trợ cả lệnh `pnpm` và `corepack pnpm`.
+
+| Lệnh                    | Mục đích                                                                |
+| ----------------------- | ----------------------------------------------------------------------- |
+| `pnpm lint`             | Kiểm tra JavaScript/TypeScript trong toàn repo, không chấp nhận warning |
+| `pnpm lint:fix`         | Tự sửa các lỗi ESLint có thể sửa được                                   |
+| `pnpm format`           | Định dạng code Backend/Frontend, cấu hình gốc và README bằng Prettier   |
+| `pnpm format:check`     | Kiểm tra định dạng mà không sửa file                                    |
+| `pnpm exec lint-staged` | Kiểm tra các file đã stage trước khi commit                             |
+
+Chuẩn định dạng chung: thụt lề 2 dấu cách, dấu nháy đơn, dấu chấm phẩy, độ dài dòng mục tiêu 100 ký tự và xuống dòng LF. `.gitattributes` và `.editorconfig` đồng bộ xuống dòng trên Windows/Linux. Với VS Code, cài extension ESLint và Prettier để dùng cấu hình của repo. Lệnh format hiện tập trung vào code, cấu hình gốc và README; tài liệu trong `docs/`, `.agent/` và `AGENTS.md` được định dạng khi chỉnh sửa và stage qua lint-staged.
+
+ESLint hiện cung cấp bộ rule TypeScript cơ bản, chưa yêu cầu `tsconfig.json`. Khi khởi tạo ứng dụng ở M0-14/M0-18, bổ sung rule dành riêng cho NestJS/Next.js và bảo đảm cả lệnh kiểm tra toàn repo lẫn hook đều áp dụng các rule đó. Docker, build/test ứng dụng và CI được triển khai ở các task tiếp theo.
+
+Trước khi tạo PR, chạy `pnpm lint` và `pnpm format:check`, xem lại `git diff`, sau đó dùng thông điệp commit dạng `chore(repo): [M0-10] configure shared tooling`.

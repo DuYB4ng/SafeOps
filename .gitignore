@@ -1,0 +1,14 @@
+node_modules/
+.next/
+dist/
+build/
+coverage/
+.cache/
+*.tsbuildinfo
+*.log
+
+.env
+.env.*
+!.env.example
+
+.husky/_/
