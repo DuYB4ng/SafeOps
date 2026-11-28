@@ -92,6 +92,10 @@ docker compose up --build
 
 Repo sử dụng **pnpm workspace**, với `backend/` và `frontend/` là hai package ứng dụng. Các công cụ ESLint, Prettier, Husky và lint-staged được quản lý tại thư mục gốc; mỗi ứng dụng sẽ có `package.json` riêng khi khởi tạo NestJS/Next.js. Commit `pnpm-lock.yaml` để cả nhóm cài cùng phiên bản dependency.
 
+Backend và frontend dùng chung pnpm 10.34.9. Khi cập nhật dependency backend, cập nhật lockfile gốc cho workspace và `backend/pnpm-lock.yaml` cho Docker có build context riêng tại `backend/`. Cài đặt toàn repo từ thư mục gốc; lockfile backend chỉ phục vụ bản build độc lập.
+
+Mỗi cấu hình ESLint chỉ định rõ `tsconfigRootDir` để chạy ổn định khi kiểm tra toàn workspace. Backend áp dụng rule có thông tin kiểu cho các file TypeScript trong `src/` và `test/`; các file cấu hình JavaScript dùng rule cơ bản. Prettier của backend giữ cùng thông số với cấu hình gốc.
+
 Chạy tại thư mục gốc sau khi clone:
 
 ```bash

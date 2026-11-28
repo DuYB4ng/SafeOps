@@ -23,6 +23,7 @@ export default defineConfig(
     languageOptions: {
       globals: globals.node,
       parserOptions: {
+        tsconfigRootDir: import.meta.dirname,
         ecmaFeatures: {
           jsx: true,
         },

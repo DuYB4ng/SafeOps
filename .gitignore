@@ -15,3 +15,5 @@ test-results/
 !.env.example
 
 .husky/_/
+uploads/
+.DS_Store
