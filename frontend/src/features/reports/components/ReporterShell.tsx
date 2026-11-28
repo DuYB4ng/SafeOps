@@ -32,8 +32,8 @@ import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut';
 import type { ConnectionStatus } from '@/types/ui';
 
 const navigation: readonly SidebarItem[] = [
-  { id: 'home', label: 'Trang chủ / Báo cáo của tôi', href: '/reports', icon: <House size={17} /> },
-  { id: 'new', label: 'Báo cáo sự cố mới', href: '/reports/new', icon: <FilePlus2 size={17} /> },
+  { id: 'home', label: 'Trang chủ / Báo cáo của tôi', href: '/', icon: <House size={17} /> },
+  { id: 'new', label: 'Báo cáo sự cố mới', href: '/new', icon: <FilePlus2 size={17} /> },
   {
     id: 'notifications',
     label: 'Thông báo',
@@ -41,19 +41,19 @@ const navigation: readonly SidebarItem[] = [
     icon: <Bell size={17} />,
     badge: '3',
   },
-  { id: 'map', label: 'Bản đồ khu vực', href: '/reports/new#location', icon: <Map size={17} /> },
+  { id: 'map', label: 'Bản đồ khu vực', href: '/new#location', icon: <Map size={17} /> },
   { id: 'profile', label: 'Cá nhân & tài khoản', href: '#profile', icon: <UserRound size={17} /> },
 ];
 
 export function ReporterShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const compact = pathname !== '/reports';
+  const compact = pathname !== '/';
   const [mobileNav, setMobileNav] = useState(false);
   const [connection, setConnection] = useState<ConnectionStatus>('reconnecting');
   const [topic, setTopic] = useState<'help' | 'hotline' | 'profile' | 'notifications' | null>(null);
   useKeyboardShortcut('Escape', () => setMobileNav(false));
   const brand = (
-    <Link className="reporter-brand" href="/reports">
+    <Link className="reporter-brand" href="/">
       <span>
         <Shield size={22} />
       </span>
@@ -105,7 +105,7 @@ export function ReporterShell({ children }: { children: ReactNode }) {
             className="reporter-sidebar"
             variant="dashboard"
             items={navigation}
-            activeId={pathname === '/reports/new' ? 'new' : 'home'}
+            activeId={pathname === '/new' ? 'new' : 'home'}
             onNavigate={(id) => {
               setMobileNav(false);
               if (id === 'notifications' || id === 'profile') {
@@ -157,7 +157,7 @@ export function ReporterShell({ children }: { children: ReactNode }) {
           onUserClick={() => setTopic('profile')}
           search={
             !compact && (
-              <form className="reporter-global-search" action="/reports">
+              <form className="reporter-global-search" action="/">
                 <Search size={14} />
                 <Input
                   name="q"
@@ -169,7 +169,7 @@ export function ReporterShell({ children }: { children: ReactNode }) {
           }
           actions={
             compact && (
-              <Link className="reporter-sos-link" href="/reports/new?urgency=CRITICAL">
+              <Link className="reporter-sos-link" href="/new?urgency=CRITICAL">
                 <Siren size={14} />
                 SOS · Phản ánh
               </Link>

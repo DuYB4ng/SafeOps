@@ -1,4 +1,5 @@
 node_modules/
+.pnpm-store/
 .next/
 frontend/next-env.d.ts
 dist/

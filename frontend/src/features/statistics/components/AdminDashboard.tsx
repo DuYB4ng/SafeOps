@@ -121,7 +121,7 @@ export function AdminDashboard() {
         userSubtitle="SOC Lead Commander"
         onMenuClick={() => setMobileNav((current) => !current)}
         brand={
-          <Link href="/" className="dashboard-brand">
+          <Link href="/dashboard" className="dashboard-brand">
             <span>
               <Shield size={23} strokeWidth={2.4} />
             </span>

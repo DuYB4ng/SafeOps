@@ -120,15 +120,23 @@ Trước khi tạo PR, chạy `pnpm lint` và `pnpm format:check`, xem lại `gi
 
 ## 7. Frontend và bộ UI SafeOps
 
+M1-13: HTTP client tại `src/services/api-client.ts`, trạng thái phiên trong bộ nhớ tại `auth-session.ts`, điều phối login/refresh/logout/khôi phục phiên tại `auth.service.ts`, `AuthProvider` và `useAuth`. Login gọi API thật qua Next.js; đăng ký vẫn là bản xem thử. Chưa có backend Auth trong repo nên cần triển khai backend trước khi đăng nhập thật. Không lưu token hoặc mật khẩu vào localStorage/sessionStorage.
+
+Dùng `import { apiClient } from '@/services/auth.service'` và `apiClient.request<T>('/incidents')` cho API nghiệp vụ; hàm trả `data` đã tách khỏi response envelope. Với JSON body, truyền header Content-Type và JSON.stringify; với FormData, để trình duyệt tự tạo Content-Type. `notify: false` tắt Toast cho request được caller xử lý riêng. `useAuth()` cung cấp user/status/login/logout/retry; khi status là loading hoặc error không coi người dùng là đã xác thực. ESLint và Git bỏ qua `.pnpm-store/` vì đây là cache dependency cục bộ.
+
+Sao chép `frontend/.env.example` thành `frontend/.env.local`: `API_URL` là địa chỉ backend chỉ server Next.js dùng; `NEXT_PUBLIC_API_URL` là địa chỉ API nghiệp vụ trình duyệt gọi. Auth đi qua `/api/auth/*` cùng origin để cookie refresh HttpOnly hoạt động. Production cần HTTPS và đặt `API_URL` thành backend tin cậy. Khởi động lại dev server sau khi đổi env. Kiểm thử M1-13 dùng backend giả lập, không thay thế nghiệm thu với backend Auth thật.
+
+Khi mở `http://localhost:3000`, ứng dụng hiển thị trang chủ Reporter. Phân hệ Reporter nằm trong route group `(reporter)`, không có tiền tố URL: `/` (danh sách), `/new` (tạo báo cáo), `/[id]` (chi tiết). Các URL `/reports` cũ được chuyển hướng sang đường dẫn mới. Dashboard điều hành nằm tại `/dashboard`.
+
 OPERATOR: `/map` là màn hình bản đồ Leaflet, gồm danh sách sự cố/lực lượng, bộ lọc, marker gom cụm, popup và modal điều phối mẫu. Nền chiến thuật/tối giản dùng sơ đồ minh họa cục bộ; nền đường phố dùng OpenStreetMap và cần mạng. Dữ liệu hiện là fixture, chưa kết nối API hoặc Socket.IO.
 
-Reporter: `/reports` hiển thị báo cáo cá nhân, `/reports/new` là form tạo và `/reports/RPT-20261109-001` là chi tiết có bổ sung minh chứng. Giao diện theo ba file CSS Figma người dùng gửi, có lọc tiếng Việt không dấu, phân trang, ảnh xem trước, nháp trong phiên trình duyệt và GPS theo yêu cầu. Dữ liệu/ảnh nền/sơ đồ là minh họa; gửi và bổ sung báo cáo chưa nối API.
+Reporter: `/` hiển thị báo cáo cá nhân, `/new` là form tạo và `/RPT-20261109-001` là chi tiết có bổ sung minh chứng. Giao diện theo ba file CSS Figma người dùng gửi, có lọc tiếng Việt không dấu, phân trang, ảnh xem trước, nháp trong phiên trình duyệt và GPS theo yêu cầu. Dữ liệu/ảnh nền/sơ đồ là minh họa; gửi và bổ sung báo cáo chưa nối API.
 
 M0-19: tổ chức đủ `app`, `features`, `components`, `services`, `hooks`, `types`. Route chia thành `(auth)` cho `/login`, `/register` và `(dashboard)` cho `/`, `/dashboard`; mỗi nhóm có layout và CSS riêng. Hook form/lọc nằm trong feature, hook phím tắt dùng chung nằm tại `src/hooks`, xuất CSV tại `src/services`, type chia sẻ tại `src/types`. Root layout giữ font, CSS chung và Toaster. `/components` là trang phát triển ngoài hai nhóm. HTTP client và refresh token thuộc M1-13.
 
-Trang `/login` và `/register` dùng thiết kế xác thực từ CSS Figma người dùng cung cấp: giới thiệu SafeOps, form hai chế độ, kiểm tra dữ liệu và ẩn/hiện mật khẩu. Đăng ký công khai dành cho REPORTER; số điện thoại tùy chọn. Đây là giao diện chưa nối API Auth, không tạo phiên đăng nhập hoặc tài khoản thật. Google Workspace và quên mật khẩu hiện hiển thị thông tin hỗ trợ.
+Trang `/login` và `/register` dùng thiết kế xác thực từ CSS Figma người dùng cung cấp: giới thiệu SafeOps, form hai chế độ, kiểm tra dữ liệu và ẩn/hiện mật khẩu. Đăng ký công khai dành cho REPORTER; số điện thoại tùy chọn. Form đăng nhập đã nối lớp Auth của M1-13; cần backend Auth để tạo phiên thật. Form đăng ký chưa tạo tài khoản. Google Workspace và quên mật khẩu hiện hiển thị thông tin hỗ trợ.
 
-Trang chính `/` và `/dashboard` hiển thị Dashboard theo file CSS thiết kế người dùng cung cấp: KPI, sơ đồ mô phỏng, phân bố/SLA và bảng sự cố. Có tìm kiếm, lọc, chọn pin, xuất CSV, xem chi tiết và mở modal điều phối từ từng hàng với dữ liệu minh họa; chưa kết nối API/Socket.IO. Bộ component tiếp tục có tại `/components`; cấu hình công cụ M0-10 giữ nguyên.
+Trang `/dashboard` hiển thị Dashboard theo file CSS thiết kế người dùng cung cấp: KPI, sơ đồ mô phỏng, phân bố/SLA và bảng sự cố. Có tìm kiếm, lọc, chọn pin, xuất CSV, xem chi tiết và mở modal điều phối từ từng hàng với dữ liệu minh họa; chưa kết nối API/Socket.IO. Bộ component tiếp tục có tại `/components`; cấu hình công cụ M0-10 giữ nguyên.
 
 Từ thư mục gốc, chạy `pnpm install --frozen-lockfile`, sau đó `pnpm --dir frontend dev`. Nếu chưa có lệnh pnpm, dùng `corepack pnpm` thay thế. Mở `http://localhost:3000/components` để xem bộ UI, đổi trạng thái kết nối mẫu, thử form điều phối, hộp thoại và thông báo. Đây là trang xem thử component với dữ liệu giả, chưa kết nối Backend/Socket.IO.
 

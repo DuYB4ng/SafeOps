@@ -1,13 +1,13 @@
 import { expect, test } from '@playwright/test';
 
-const firstReport = '/reports/RPT-20261109-001';
+const firstReport = '/RPT-20261109-001';
 const png = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jB1kAAAAASUVORK5CYII=',
   'base64',
 );
 
 test('filters personal reports without accents, resets dates and paginates', async ({ page }) => {
-  await page.goto('/reports');
+  await page.goto('/');
   await expect(page.locator('.reporter-report-card')).toHaveCount(3);
   await page.getByRole('button', { name: 'Trang báo cáo 2', exact: true }).click();
   await expect(page.locator('.reporter-card-grid')).toContainText('Nước rò rỉ');
@@ -26,7 +26,7 @@ test('filters personal reports without accents, resets dates and paginates', asy
 test('SOS opens the new report with suggested urgency and validates before preview', async ({
   page,
 }) => {
-  await page.goto('/reports');
+  await page.goto('/');
   await page.getByRole('link', { name: 'Báo cáo sự cố khẩn cấp', exact: true }).click();
   await expect(page.getByRole('radio', { name: /CRITICAL/ })).toBeChecked();
   await page.getByRole('button', { name: 'Kiểm tra phản ánh khẩn cấp', exact: true }).click();
@@ -48,7 +48,7 @@ test('SOS opens the new report with suggested urgency and validates before previ
 test('validates image formats, size and count, then removes selected previews', async ({
   page,
 }) => {
-  await page.goto('/reports/new');
+  await page.goto('/new');
   const input = page.getByLabel('Chọn ảnh minh chứng', { exact: true });
   await input.setInputFiles({
     name: 'test.svg',
@@ -88,7 +88,7 @@ test('restores a deliberately saved draft after reload and requests GPS on deman
 }) => {
   await context.grantPermissions(['geolocation']);
   await context.setGeolocation({ latitude: 10.76, longitude: 106.66 });
-  await page.goto('/reports/new');
+  await page.goto('/new');
   await page.getByLabel('Tiêu đề sự cố', { exact: false }).fill('Bản nháp kiểm tra rò rỉ nước');
   await page.getByRole('button', { name: 'Lưu nháp', exact: true }).click();
   await page.reload();
@@ -125,7 +125,7 @@ test('details support lightbox and supplemental validation without exposing phon
   await page.getByRole('button', { name: 'Gửi thông tin bổ sung', exact: true }).click();
   await expect(page.locator('.reporter-form-result')).toContainText('Chưa gửi bổ sung');
   await expect(page.getByRole('button', { name: 'Đánh giá 5 sao', exact: true })).toBeDisabled();
-  await page.goto('/reports/RPT-20261108-003');
+  await page.goto('/RPT-20261108-003');
   await expect(page.getByRole('button', { name: 'Gửi thông tin bổ sung' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Đánh giá 5 sao', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Đánh giá 5 sao', exact: true })).toHaveAttribute(
@@ -135,20 +135,20 @@ test('details support lightbox and supplemental validation without exposing phon
 });
 
 test('unknown report IDs return not found', async ({ page }) => {
-  const response = await page.goto('/reports/unknown-report');
+  const response = await page.goto('/unknown-report');
   expect(response?.status()).toBe(404);
 });
 
 test('Reporter pages fit mobile and the sidebar navigates to the create form', async ({ page }) => {
   for (const width of [390, 320]) {
     await page.setViewportSize({ width, height: 844 });
-    for (const route of ['/reports', '/reports/new', firstReport]) {
+    for (const route of ['/', '/new', firstReport]) {
       await page.goto(route);
       expect(
         await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
         `${route} at ${width}px`,
       ).toBe(true);
-      if (route === '/reports') {
+      if (route === '/') {
         for (const label of ['Từ ngày', 'Đến ngày']) {
           const bounds = await page.getByLabel(label, { exact: true }).boundingBox();
           expect(bounds!.width).toBeGreaterThanOrEqual(100);
@@ -156,10 +156,10 @@ test('Reporter pages fit mobile and the sidebar navigates to the create form', a
       }
     }
   }
-  await page.goto('/reports');
+  await page.goto('/');
   await page.getByRole('button', { name: 'Mở điều hướng', exact: true }).click();
   await page.getByRole('link', { name: 'Báo cáo sự cố mới', exact: true }).click();
-  await expect(page).toHaveURL(/\/reports\/new$/);
+  await expect(page).toHaveURL(/\/new$/);
   await expect(
     page.getByRole('heading', { name: 'Gửi phản ánh, cùng giữ gìn an toàn' }),
   ).toBeVisible();

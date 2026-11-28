@@ -149,9 +149,9 @@ gantt
 #### 2. Nhiệm vụ Frontend:
 
 - **FE1:**
-  - Xây dựng phân hệ Báo cáo cho Reporter (`/reports/new` và `/reports`):
+  - Xây dựng phân hệ Báo cáo cho Reporter (`/new` và `/`):
     - Form nhập mô tả, bấm chọn tọa độ trên bản đồ hoặc dùng định vị trình duyệt, đính kèm tối đa 5 ảnh.
-    - Trang danh sách theo dõi trạng thái các báo cáo cá nhân do mình gửi (`/reports`).
+    - Trang danh sách theo dõi trạng thái các báo cáo cá nhân do mình gửi (`/`).
   - Xây dựng phân hệ Hàng đợi Cảnh báo cho Operator (`/alerts` và `/alerts/new`):
     - Danh sách hàng đợi cảnh báo mới, hiển thị thời gian chờ SLA.
     - Dialog xử lý: Xác nhận cảnh báo (chọn loại, ưu tiên, tiêu đề), Loại bỏ cảnh báo (form nhập lý do bắt buộc), Gộp cảnh báo trùng.

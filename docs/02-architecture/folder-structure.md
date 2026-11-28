@@ -185,11 +185,12 @@ frontend/
 │   │   │   └── register/page.tsx
 │   │   └── (dashboard)/                     # khu vực ứng dụng
 │   │       ├── layout.tsx                   # CSS nhóm; AppShell theo task layout
-│   │       ├── page.tsx                     # / — Dashboard hiện tại
 │   │       ├── dashboard/page.tsx
-│   │       ├── reports/                     # REPORTER
-│   │       │   ├── page.tsx                 # báo cáo của tôi
-│   │       │   └── new/page.tsx             # gửi báo cáo
+│   │       ├── (reporter)/                  # REPORTER: /, /new, /[id]
+│   │       │   ├── layout.tsx               # ReporterShell và CSS Reporter
+│   │       │   ├── page.tsx                 # / — báo cáo của tôi
+│   │       │   ├── new/page.tsx             # /new — gửi báo cáo
+│   │       │   └── [id]/page.tsx            # /[id] — chi tiết báo cáo
 │   │       ├── alerts/                      # OPERATOR, COMMANDER
 │   │       │   ├── page.tsx                 # hàng đợi cảnh báo
 │   │       │   └── new/page.tsx             # nhập thủ công
@@ -288,7 +289,7 @@ features/incidents/
 | Route                           | Vai trò truy cập                                                    |
 | ------------------------------- | ------------------------------------------------------------------- |
 | `/login`, `/register`           | Chưa đăng nhập                                                      |
-| `/reports`, `/reports/new`      | REPORTER (các vai trò khác cũng có thể gửi báo cáo)                 |
+| `/`, `/new`                     | REPORTER (các vai trò khác cũng có thể gửi báo cáo)                 |
 | `/alerts`, `/alerts/new`        | OPERATOR, COMMANDER                                                 |
 | `/incidents`, `/incidents/[id]` | OPERATOR, COMMANDER, ADMIN (chỉ đọc); RESPONDER chỉ sự cố được giao |
 | `/map`                          | OPERATOR, COMMANDER, ADMIN; RESPONDER chỉ sự cố được giao           |
@@ -344,7 +345,7 @@ Nguồn: CSS frame `Xác thực tài khoản` (1280×1062px) do người dùng g
 - Route mỏng `src/app/(auth)/login/page.tsx` và `register/page.tsx`, layout auth dùng CSS có phạm vi trong `src/features/auth/auth.css`.
 - `src/features/auth/components/`: khung giới thiệu, form chung và trường mật khẩu. Dùng Button, Input, Label, Dialog hiện có; không thay đổi Dashboard hoặc thư viện component.
 - `src/features/auth/validation.ts`: kiểm tra email, họ tên, số điện thoại tùy chọn (ERD cho phép null), mật khẩu đăng ký tối thiểu 8 ký tự có số và ký tự đặc biệt theo file thiết kế, đồng ý điều khoản. Mật khẩu đăng nhập chỉ kiểm tra bắt buộc, không áp chính sách tạo mật khẩu lên tài khoản hiện hữu.
-- Đăng ký công khai tương ứng `REPORTER` (FR-AUTH-04), không có lựa chọn tự cấp vai trò. Backend hiện chưa có module auth; submit chỉ kiểm tra form và báo rõ chưa đăng nhập/tạo tài khoản. Không lưu mật khẩu, token hoặc thông tin form vào browser storage, không giả lập phiên đăng nhập và không chuyển Dashboard sau submit.
+- Đăng ký công khai tương ứng `REPORTER` (FR-AUTH-04), không có lựa chọn tự cấp vai trò. Form đăng ký vẫn chỉ kiểm tra dữ liệu và chưa tạo tài khoản. M1-13 nối form đăng nhập qua lớp trung gian Auth của Next.js; backend local hiện chưa có module auth nên chỉ đăng nhập thật khi cấu hình backend có Auth. Không lưu mật khẩu/token vào browser storage. Điều hướng và bảo vệ route theo vai trò thuộc các task tiếp theo.
 - Google Workspace, quên mật khẩu và nội dung điều khoản chưa có hợp đồng API/cấu hình; giao diện mở thông tin hỗ trợ, không mô phỏng đăng nhập SSO hoặc gửi email đặt lại mật khẩu. Khi tích hợp backend, dùng API Auth và TanStack Query theo quy chuẩn dự án; backend tiếp tục kiểm tra dữ liệu và quyền.
 - Mobile ưu tiên form trước cột giới thiệu; hỗ trợ bàn phím, nhãn trường, lỗi liên kết qua `aria-describedby`, ẩn/hiện mật khẩu và chuyển giữa `/login` / `/register`.
 
@@ -381,7 +382,7 @@ src/
 
 `useAuthForm` quản lý state, validation, submit và focus lỗi của form mẫu; component giữ phần hiển thị. `useIncidentFilters` quản lý tìm kiếm/lọc trong dữ liệu fixture. `useKeyboardShortcut` gom cơ chế phím tắt dùng chung. `incident-export.service` nhận dữ liệu qua type chung, tạo/tải CSV và thu hồi Object URL; component không trực tiếp thao tác Blob/DOM tải file. Các phần này được sử dụng trong giao diện hiện tại, không tạo thư mục rỗng.
 
-`types/api.ts` mô tả response đơn, phân trang và lỗi theo API contract. Type của form auth và view model Dashboard được tách khỏi `validation.ts`/`fixtures.ts`. Enum API giữ nguyên. `services/api-client.ts`, interceptor refresh token, Auth Store và tích hợp API thuộc M1-13, chưa triển khai trong M0-19.
+`types/api.ts` mô tả response đơn, phân trang và lỗi theo API contract. Type của form auth và view model Dashboard được tách khỏi `validation.ts`/`fixtures.ts`. Enum API giữ nguyên. M1-13 bổ sung `services/api-client.ts` (factory HTTP), `auth-session.ts` (store phiên trong bộ nhớ), `auth.service.ts` (singleton `apiClient`, điều phối refresh/login/logout), `providers/AuthProvider.tsx` và `hooks/useAuth.ts`. AuthContext chỉ giữ phiên; cache dữ liệu nghiệp vụ vẫn thuộc TanStack Query khi tích hợp các feature.
 
 - Root `app/layout.tsx` giữ HTML/body, Inter, `globals.css` và Toaster.
 - `app/(auth)/layout.tsx` dùng `AuthShell` và import `features/auth/auth.css`; chứa `/login`, `/register`.
@@ -394,7 +395,7 @@ src/
 
 Nguồn người dùng cung cấp: frame `Trang chủ/Web` (1280×1441), `Bổ sung chi tiết` (1280×1768.5), `Tạo báo cáo` (1280×1340.42). Trang danh sách có sidebar 256px, header 56px, hero đỏ, 4 thẻ thống kê, bộ lọc và 3 card/trang. Trang tạo/chi tiết dùng header rộng, nội dung hai cột, nền sáng, card radius 12px, badge 100×25px. CSS có phạm vi `.reporter-*`; giữ Dashboard và bộ UI hiện tại.
 
-- Route mỏng trong `app/(dashboard)/reports/`: `layout.tsx` dùng `ReporterShell`, `page.tsx` cho danh sách, `new/page.tsx` cho tạo báo cáo, `[id]/page.tsx` cho chi tiết và bổ sung. Layout dùng sidebar cho danh sách, header rộng cho trang con như file thiết kế. Đây là bố cục UI, chưa là phân quyền.
+- Route mỏng trong `app/(dashboard)/(reporter)/`: `layout.tsx` dùng `ReporterShell`, `page.tsx` cho danh sách, `new/page.tsx` cho tạo báo cáo, `[id]/page.tsx` cho chi tiết và bổ sung. Layout dùng sidebar cho danh sách, header rộng cho trang con như file thiết kế. Đây là bố cục UI, chưa là phân quyền.
 - `features/reports/`: components, hooks, fixture, validation, CSS và trình bày trạng thái. Types tại `types/reports.ts`, `types/uploads.ts`; hook ảnh dùng chung tại `hooks/useImageAttachments.ts`; service chọn ảnh/nháp tại `services/`.
 - Dữ liệu là fixture của một Reporter mẫu. Tìm kiếm hỗ trợ tiếng Việt không dấu, lọc trạng thái/loại/ngày, phân trang và xem chi tiết. `allowedActions` mẫu điều khiển bổ sung/đánh giá, không suy diễn quyền từ status. Backend sau này phải áp phạm vi `own`; UI chưa gọi API.
 - Nhãn PENDING/PROCESSING/ASSIGNED là trình bày Figma; enum nghiệp vụ hiện tại được giữ nguyên. Mức độ trên form là đề xuất hỗ trợ của người báo cáo, không ấn định priority chính thức (BR-13). Chưa thêm trường/endpoint API ngoài hợp đồng hiện hành.
@@ -582,7 +583,7 @@ Trong frontend dùng alias `@/` trỏ tới `src/`, không dùng đường dẫn
 | Nhóm yêu cầu                   | Backend (module)                                        | Frontend (feature / route)                               |
 | ------------------------------ | ------------------------------------------------------- | -------------------------------------------------------- |
 | FR-AUTH (xác thực, người dùng) | `auth`, `users`                                         | `auth` / `/login`, `/register`                           |
-| FR-ALERT (tiếp nhận cảnh báo)  | `alerts`, `uploads`                                     | `reports` / `/reports/*`; `alerts` / `/alerts/*`         |
+| FR-ALERT (tiếp nhận cảnh báo)  | `alerts`, `uploads`                                     | `reports` / `/`, `/new`, `/[id]`; `alerts` / `/alerts/*` |
 | FR-INC (sự cố)                 | `incidents`, `uploads`, `incident-logs`                 | `incidents` / `/incidents/*`                             |
 | FR-UNIT (lực lượng)            | `units`                                                 | `units` / `/units`                                       |
 | FR-DISP (điều phối)            | `dispatch`                                              | `dispatch` (dùng trong `/incidents/[id]`), `/my-tasks/*` |

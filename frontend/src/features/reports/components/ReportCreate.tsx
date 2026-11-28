@@ -67,7 +67,7 @@ export function ReportCreate({ initialUrgency }: { initialUrgency?: string }) {
         </p>
       </div>
       <nav className="reporter-breadcrumb" aria-label="Đường dẫn">
-        <Link href="/reports">
+        <Link href="/">
           <House size={12} />
           Báo cáo của tôi
         </Link>
@@ -288,7 +288,7 @@ export function ReportCreate({ initialUrgency }: { initialUrgency?: string }) {
           </section>
         </div>
         <div className="reporter-action-dock">
-          <Link href="/reports">Quay lại</Link>
+          <Link href="/">Quay lại</Link>
           <div>
             <Button type="button" variant="outline" onClick={form.saveDraft}>
               <Save size={15} />

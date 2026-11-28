@@ -85,11 +85,11 @@ export function ReporterHome({ initialSearch = '' }: { initialSearch?: string })
             Ban Quản lý luôn sẵn sàng tiếp nhận thông tin.
           </p>
           <div>
-            <Link className="reporter-hero-primary" href="/reports/new?urgency=CRITICAL">
+            <Link className="reporter-hero-primary" href="/new?urgency=CRITICAL">
               <Siren size={19} />
               Báo cáo sự cố khẩn cấp
             </Link>
-            <Link className="reporter-hero-secondary" href="/reports/new">
+            <Link className="reporter-hero-secondary" href="/new">
               <FilePlus2 size={16} />
               Gửi phản ánh khác
             </Link>
@@ -209,7 +209,7 @@ export function ReporterHome({ initialSearch = '' }: { initialSearch?: string })
                 >
                   <Link
                     className="reporter-card-image"
-                    href={`/reports/${report.id}`}
+                    href={`/${report.id}`}
                     aria-label={`Xem chi tiết ${report.id}`}
                   >
                     <ReportIllustration
@@ -226,7 +226,7 @@ export function ReporterHome({ initialSearch = '' }: { initialSearch?: string })
                       {reportCategories.find((item) => item.code === report.category)?.name}
                     </small>
                     <h3>
-                      <Link href={`/reports/${report.id}`}>{report.title}</Link>
+                      <Link href={`/${report.id}`}>{report.title}</Link>
                     </h3>
                   </div>
                   <div className="reporter-badge-pair">
@@ -280,15 +280,12 @@ export function ReporterHome({ initialSearch = '' }: { initialSearch?: string })
                     </span>
                   </div>
                   <footer>
-                    <Link href={`/reports/${report.id}`}>
+                    <Link href={`/${report.id}`}>
                       Xem chi tiết & tiến trình
                       <ArrowUpRight size={13} />
                     </Link>
                     {report.allowedActions.includes('ADD_INFORMATION') && (
-                      <Link
-                        className="reporter-supplement-link"
-                        href={`/reports/${report.id}#supplement`}
-                      >
+                      <Link className="reporter-supplement-link" href={`/${report.id}#supplement`}>
                         Bổ sung ngay
                       </Link>
                     )}

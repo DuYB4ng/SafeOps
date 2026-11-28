@@ -86,7 +86,7 @@ export function ReportDetail({ report }: { report: ReporterReport }) {
     <div className="reporter-detail">
       <div className="reporter-detail-toolbar">
         <nav className="reporter-breadcrumb" aria-label="Đường dẫn">
-          <Link href="/reports">
+          <Link href="/">
             <House size={12} />
             Báo cáo của tôi
           </Link>
@@ -98,7 +98,7 @@ export function ReportDetail({ report }: { report: ReporterReport }) {
             <Printer size={13} />
             In báo cáo
           </Button>
-          <Link href="/reports/new">Gửi phản ánh mới</Link>
+          <Link href="/new">Gửi phản ánh mới</Link>
         </div>
       </div>
       <header className="reporter-detail-title">

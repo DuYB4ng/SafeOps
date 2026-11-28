@@ -25,6 +25,7 @@ import {
 import { PasswordField } from './PasswordField';
 import type { AuthMode } from '@/types/auth';
 import { useAuthForm } from '../hooks/useAuthForm';
+import { useAuth } from '@/hooks/useAuth';
 
 type InfoTopic = 'sso' | 'reset' | 'terms' | 'privacy';
 const infoContent: Record<InfoTopic, { title: string; description: string; content: string }> = {
@@ -52,7 +53,7 @@ const infoContent: Record<InfoTopic, { title: string; description: string; conte
     description:
       'Chính sách bảo mật chính thức sẽ được đơn vị vận hành cung cấp trước khi mở đăng ký.',
     content:
-      'Form hiện kiểm tra dữ liệu trên trình duyệt, không gửi thông tin đến máy chủ và không lưu mật khẩu vào bộ nhớ trình duyệt.',
+      'Đăng nhập gửi email và mật khẩu đến máy chủ xác thực. Mật khẩu không được lưu vào bộ nhớ trình duyệt. Form đăng ký hiện chỉ là bản xem thử.',
   },
 };
 
@@ -77,8 +78,9 @@ function GoogleMark() {
 }
 
 export function AuthForm({ mode }: { mode: AuthMode }) {
+  const auth = useAuth();
   const register = mode === 'register';
-  const { formRef, values, errors, result, updateValue, handleSubmit } = useAuthForm(mode);
+  const { formRef, values, errors, result, pending, updateValue, handleSubmit } = useAuthForm(mode);
   const infoTrigger = useRef<HTMLButtonElement | null>(null);
   const [topic, setTopic] = useState<InfoTopic | null>(null);
 
@@ -110,6 +112,34 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
             : 'Đăng nhập để tiếp tục theo dõi và phối hợp xử lý sự cố cùng đội ngũ của bạn.'}
         </p>
       </div>
+      {!register && auth.status === 'authenticated' && auth.user && (
+        <div className="mb-4 flex flex-wrap items-center gap-3 text-sm">
+          <p>Phiên hiện tại: {auth.user.fullName}</p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              void auth.logout().catch(() => undefined);
+            }}
+          >
+            Đăng xuất
+          </Button>
+        </div>
+      )}
+      {!register && auth.status === 'error' && (
+        <div className="mb-4 flex flex-wrap items-center gap-3 text-sm">
+          <p>Chưa thể kiểm tra phiên đăng nhập.</p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              void auth.retry();
+            }}
+          >
+            Thử lại kiểm tra phiên
+          </Button>
+        </div>
+      )}
       <Button
         type="button"
         variant="outline"
@@ -246,9 +276,9 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
             </button>
           </div>
         )}
-        <Button type="submit" className="auth-submit">
+        <Button type="submit" className="auth-submit" disabled={pending} aria-busy={pending}>
           {register ? <UserRoundPlus size={16} /> : <LogIn size={16} />}
-          {register ? 'Tạo tài khoản' : 'Đăng nhập'}
+          {pending ? 'Đang đăng nhập...' : register ? 'Tạo tài khoản' : 'Đăng nhập'}
         </Button>
         {result && (
           <p className="auth-result" role="status">
