@@ -1,13 +1,16 @@
 # SafeOps Base Backend
 
 NestJS 11, TypeScript strict, PostgreSQL 16 and TypeORM (migrations only).
-Run commands from this directory. Package manager is pinned in package.json.
+Use pnpm 10.34.9, matching the root workspace. Install local dependencies from
+the repository root; run backend scripts with `corepack pnpm --dir backend <script>`.
+The backend lockfile supports the independent Docker build context.
 
 ## Development
 
 ```powershell
-corepack.cmd enable
-pnpm install --frozen-lockfile
+cd ..
+corepack pnpm install --frozen-lockfile
+cd backend
 Copy-Item .env.example .env
 docker compose up -d --build
 ```

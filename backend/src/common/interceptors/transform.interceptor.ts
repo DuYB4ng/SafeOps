@@ -1,9 +1,4 @@
-import {
-  CallHandler,
-  ExecutionContext,
-  Injectable,
-  NestInterceptor,
-} from '@nestjs/common';
+import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 import type { Response } from 'express';
 import { map, Observable } from 'rxjs';
 
@@ -17,12 +12,7 @@ export class TransformInterceptor implements NestInterceptor<unknown, unknown> {
     const response = context.switchToHttp().getResponse<Response>();
     return next.handle().pipe(
       map((result: unknown) => {
-        if (
-          result &&
-          typeof result === 'object' &&
-          'data' in result &&
-          'meta' in result
-        ) {
+        if (result && typeof result === 'object' && 'data' in result && 'meta' in result) {
           return {
             statusCode: response.statusCode,
             data: result.data,

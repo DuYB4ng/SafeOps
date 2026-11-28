@@ -17,9 +17,7 @@ export interface Environment {
   SLA_CHECK_INTERVAL_SECONDS: number;
 }
 const schema = Joi.object<Environment>({
-  NODE_ENV: Joi.string()
-    .valid('development', 'test', 'production')
-    .default('development'),
+  NODE_ENV: Joi.string().valid('development', 'test', 'production').default('development'),
   PORT: Joi.number().port().min(1).default(3001),
   POSTGRES_USER: Joi.string().required(),
   POSTGRES_PASSWORD: Joi.string().required(),
@@ -28,10 +26,7 @@ const schema = Joi.object<Environment>({
     .uri({ scheme: ['postgres', 'postgresql'] })
     .required(),
   JWT_ACCESS_SECRET: Joi.string().min(32).required(),
-  JWT_REFRESH_SECRET: Joi.string()
-    .min(32)
-    .invalid(Joi.ref('JWT_ACCESS_SECRET'))
-    .required(),
+  JWT_REFRESH_SECRET: Joi.string().min(32).invalid(Joi.ref('JWT_ACCESS_SECRET')).required(),
   JWT_ACCESS_TTL: Joi.string()
     .pattern(/^[1-9]\d*[smhd]$/)
     .default('15m'),
@@ -53,8 +48,7 @@ export function validate(config: Record<string, unknown>): Environment {
   const { error } = result;
   if (error) {
     throw new Error(
-      'Environment validation failed: ' +
-        error.details.map((detail) => detail.message).join('; '),
+      'Environment validation failed: ' + error.details.map((detail) => detail.message).join('; '),
     );
   }
   return result.value;

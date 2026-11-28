@@ -1,10 +1,4 @@
-import {
-  ArgumentsHost,
-  Catch,
-  ExceptionFilter,
-  HttpException,
-  Logger,
-} from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, Logger } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { OptimisticLockVersionMismatchError } from 'typeorm';
 
@@ -54,8 +48,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         }
       }
     }
-    if (statusCode >= 500)
-      this.logger.error('Request failed with HTTP ' + statusCode);
+    if (statusCode >= 500) this.logger.error('Request failed with HTTP ' + statusCode);
     response.status(statusCode).json({
       statusCode,
       code,

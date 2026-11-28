@@ -20,10 +20,6 @@ export function setupApp(app: INestApplication): void {
     .setVersion('1.0')
     .addBearerAuth()
     .build();
-  SwaggerModule.setup(
-    'api',
-    app,
-    SwaggerModule.createDocument(app, swaggerConfig),
-  );
+  SwaggerModule.setup('api', app, SwaggerModule.createDocument(app, swaggerConfig));
   app.enableShutdownHooks();
 }

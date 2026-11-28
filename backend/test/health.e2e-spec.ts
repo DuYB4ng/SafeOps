@@ -22,9 +22,7 @@ describe('Base backend HTTP (requires PostgreSQL from .env)', () => {
   });
 
   it('returns 200 after a real PostgreSQL query', async () => {
-    const response = await request(
-      app.getHttpServer() as import('node:http').Server,
-    )
+    const response = await request(app.getHttpServer() as import('node:http').Server)
       .get('/api/v1/health')
       .expect(200);
     expect(response.body).toEqual({
@@ -37,9 +35,7 @@ describe('Base backend HTTP (requires PostgreSQL from .env)', () => {
     await request(app.getHttpServer() as import('node:http').Server)
       .get('/api/')
       .expect(200);
-    const response = await request(
-      app.getHttpServer() as import('node:http').Server,
-    )
+    const response = await request(app.getHttpServer() as import('node:http').Server)
       .get('/api-json')
       .expect(200);
     expect(response.text).toContain('bearer');
@@ -51,9 +47,7 @@ describe('Base backend HTTP (requires PostgreSQL from .env)', () => {
       .spyOn(dataSource, 'query')
       .mockRejectedValueOnce(new Error('private DB credentials'));
     try {
-      const response = await request(
-        app.getHttpServer() as import('node:http').Server,
-      )
+      const response = await request(app.getHttpServer() as import('node:http').Server)
         .get('/api/v1/health')
         .expect(503);
       expect(response.body).toMatchObject({
@@ -70,9 +64,7 @@ describe('Base backend HTTP (requires PostgreSQL from .env)', () => {
   });
 
   it('returns the error contract for unknown routes', async () => {
-    const response = await request(
-      app.getHttpServer() as import('node:http').Server,
-    )
+    const response = await request(app.getHttpServer() as import('node:http').Server)
       .get('/api/v1/missing')
       .expect(404);
     expect(response.body).toMatchObject({

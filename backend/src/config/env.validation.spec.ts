@@ -24,12 +24,10 @@ describe('Environment configuration', () => {
   });
   it('rejects invalid ports, URLs and duplicate secrets', () => {
     expect(() => validate({ ...valid, PORT: '65536' })).toThrow('PORT');
-    expect(() =>
-      validate({ ...valid, DATABASE_URL: 'http://localhost' }),
-    ).toThrow('DATABASE_URL');
-    expect(() =>
-      validate({ ...valid, JWT_REFRESH_SECRET: valid.JWT_ACCESS_SECRET }),
-    ).toThrow('JWT_REFRESH_SECRET');
+    expect(() => validate({ ...valid, DATABASE_URL: 'http://localhost' })).toThrow('DATABASE_URL');
+    expect(() => validate({ ...valid, JWT_REFRESH_SECRET: valid.JWT_ACCESS_SECRET })).toThrow(
+      'JWT_REFRESH_SECRET',
+    );
   });
   it('keeps schema changes disabled', () => {
     expect(databaseOptions(valid.DATABASE_URL)).toMatchObject({

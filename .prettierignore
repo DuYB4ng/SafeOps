@@ -1,0 +1,13 @@
+node_modules/
+.next/
+**/next-env.d.ts
+dist/
+build/
+coverage/
+playwright-report/
+test-results/
+.cache/
+pnpm-lock.yaml
+.husky/
+.env
+.env.*

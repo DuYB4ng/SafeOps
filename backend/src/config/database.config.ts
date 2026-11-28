@@ -15,6 +15,4 @@ export function databaseOptions(url: string): DataSourceOptions {
     extra: { statement_timeout: 5000, query_timeout: 5000 },
   };
 }
-export default registerAs('database', () =>
-  databaseOptions(process.env.DATABASE_URL!),
-);
+export default registerAs('database', () => databaseOptions(process.env.DATABASE_URL!));

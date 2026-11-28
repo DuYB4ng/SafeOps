@@ -35,14 +35,14 @@ Bản đồ Leaflet, Socket.IO Sync, Điều phối, Việc của tôi, Dashboar
 
 ### Bảng phân vai chi tiết:
 
-| Thành viên | Trách nhiệm chính | Module phụ trách chính |
-|---|---|---|
-| **BE1 (Bạn - Lead)** | Kiến trúc tổng thể, Base Entity, Migration đầu tiên, Engine máy trạng thái, Quản lý giao dịch & Khóa bi quan, Code review. | `database/`, `common/state-machine/`, `incidents/derive-incident-status.ts` |
-| **BE2** | Quản lý người dùng, Xác thực JWT kép, Phân quyền RBAC, Danh mục loại sự cố, Ghi nhật ký bất biến. | `modules/auth/`, `modules/users/`, `modules/incident-types/`, `modules/incident-logs/` |
-| **BE3** | Xử lý tệp đính kèm, Tiếp nhận cảnh báo, Giải thuật gợi ý trùng lặp, Nghiệp vụ sự cố cơ bản. | `modules/uploads/`, `modules/alerts/`, `modules/incidents/` |
-| **BE4** | Quản lý lực lượng, Cự ly Haversine, Động cơ điều phối, Gateway Socket.IO, Tác vụ nền SLA & Thống kê. | `modules/units/`, `modules/dispatch/`, `modules/realtime/`, `modules/sla/`, `modules/statistics/` |
-| **FE1** | Khung Next.js, Styling shadcn/ui + Tailwind CSS, Layout phân quyền, Xác thực, Form báo cáo Reporter, Hàng đợi Operator, Quản trị Admin. | `features/auth/`, `features/reports/`, `features/alerts/`, `components/layout/`, `app/(auth)/` |
-| **FE2** | Tích hợp bản đồ Leaflet, Quản lý WebSocket Socket.IO, Đồng bộ cache TanStack Query, Màn hình điều phối SOC, Màn hình Responder, Dashboard. | `features/map/`, `features/incidents/`, `features/dispatch/`, `features/my-tasks/`, `features/statistics/`, `providers/SocketProvider` |
+| Thành viên           | Trách nhiệm chính                                                                                                                          | Module phụ trách chính                                                                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| **BE1 (Bạn - Lead)** | Kiến trúc tổng thể, Base Entity, Migration đầu tiên, Engine máy trạng thái, Quản lý giao dịch & Khóa bi quan, Code review.                 | `database/`, `common/state-machine/`, `incidents/derive-incident-status.ts`                                                            |
+| **BE2**              | Quản lý người dùng, Xác thực JWT kép, Phân quyền RBAC, Danh mục loại sự cố, Ghi nhật ký bất biến.                                          | `modules/auth/`, `modules/users/`, `modules/incident-types/`, `modules/incident-logs/`                                                 |
+| **BE3**              | Xử lý tệp đính kèm, Tiếp nhận cảnh báo, Giải thuật gợi ý trùng lặp, Nghiệp vụ sự cố cơ bản.                                                | `modules/uploads/`, `modules/alerts/`, `modules/incidents/`                                                                            |
+| **BE4**              | Quản lý lực lượng, Cự ly Haversine, Động cơ điều phối, Gateway Socket.IO, Tác vụ nền SLA & Thống kê.                                       | `modules/units/`, `modules/dispatch/`, `modules/realtime/`, `modules/sla/`, `modules/statistics/`                                      |
+| **FE1**              | Khung Next.js, Styling shadcn/ui + Tailwind CSS, Layout phân quyền, Xác thực, Form báo cáo Reporter, Hàng đợi Operator, Quản trị Admin.    | `features/auth/`, `features/reports/`, `features/alerts/`, `components/layout/`, `app/(auth)/`                                         |
+| **FE2**              | Tích hợp bản đồ Leaflet, Quản lý WebSocket Socket.IO, Đồng bộ cache TanStack Query, Màn hình điều phối SOC, Màn hình Responder, Dashboard. | `features/map/`, `features/incidents/`, `features/dispatch/`, `features/my-tasks/`, `features/statistics/`, `providers/SocketProvider` |
 
 ---
 
@@ -78,9 +78,11 @@ gantt
 ## 3. Kế hoạch Chi tiết Từng Tuần (Weekly Breakdown)
 
 ### TUẦN 1: Khởi tạo Khung dự án, Cơ sở Dữ liệu & Phân hệ Xác thực
+
 > **Mục tiêu tuần 1:** Dựng hoàn chỉnh bộ khung cả Backend và Frontend, chạy được trên Docker bằng `pnpm`. Hoàn thành phân hệ Đăng nhập/Đăng ký và xác thực vai trò (RBAC).
 
 #### 1. Nhiệm vụ Backend:
+
 - **BE1 (Lead):**
   - Khởi tạo dự án NestJS trong `apps/backend` với `pnpm`. Cấu hình `docker-compose.yml` (PostgreSQL 16 + NestJS dev mode).
   - Viết `BaseAppEntity` (`id UUID`, `created_at`, `updated_at`, `deleted_at`).
@@ -99,18 +101,20 @@ gantt
   - Cấu hình Swagger OpenAPI tại `/api` để Frontend có tài liệu tương tác trực tiếp.
 
 #### 2. Nhiệm vụ Frontend:
+
 - **FE1 (UI Lead):**
   - Khởi tạo dự án Next.js (App Router, TypeScript) trong `apps/frontend` với `pnpm`.
   - Cấu hình Tailwind CSS và tích hợp thư viện component `shadcn/ui` (Button, Input, Card, Table, Dialog, Toast, Form).
-  - Xây dựng cấu trúc layout: Layout đăng nhập `(auth)` và Layout chính `(app)` có Sidebar điều hướng thích ứng theo 5 vai trò.
+  - Xây dựng cấu trúc layout: Layout đăng nhập `(auth)` và Layout chính `(dashboard)` có Sidebar điều hướng thích ứng theo 5 vai trò. M0-19 tách route group và CSS; AppShell/phân quyền hoàn thiện ở task layout và xác thực tương ứng.
   - Viết trang `/login` và `/register`.
 - **FE2:**
   - Thiết lập `providers/QueryProvider.tsx` (TanStack Query) và `providers/AuthProvider.tsx`.
-  - Viết `lib/api-client.ts`: Tự động đính kèm `Authorization: Bearer <token>`, tự động gọi `/auth/refresh` khi nhận lỗi 401.
+  - Viết `services/api-client.ts`: Tự động đính kèm `Authorization: Bearer <token>`, tự động gọi `/auth/refresh` khi nhận lỗi 401. M0-19 tổ chức riêng các tầng `services`, `hooks`, `types`; HTTP client, refresh token và Auth Store thực hiện ở M1-13 theo bảng task.
   - Định nghĩa toàn bộ TypeScript Enums & Interfaces trong `src/types/` đồng bộ từ [`api-contract.md`](../04-api/api-contract.md).
   - Viết component `ConnectionBadge` (hiển thị trạng thái kết nối mạng trên Header).
 
 #### 3. Tiêu chí Nghiệm thu Tuần 1 (Milestone 1):
+
 - [x] Chạy `docker compose up` ở cả 2 thư mục thành công không lỗi.
 - [x] Chạy `pnpm migration:run` và `pnpm seed` nạp đủ 11 tài khoản mẫu.
 - [x] Đăng nhập trên giao diện Web bằng tài khoản bất kỳ trong seed data thành công.
@@ -119,9 +123,11 @@ gantt
 ---
 
 ### TUẦN 2: Tiếp nhận Cảnh báo, Quản lý Sự cố & Tích hợp Bản đồ Số
+
 > **Mục tiêu tuần 2:** Xây dựng luồng tiếp nhận cảnh báo từ người dân (Reporter), xác minh của điều phối viên (Operator), chuyển hóa thành Sự cố và hiển thị trực quan trên bản đồ Leaflet.
 
 #### 1. Nhiệm vụ Backend:
+
 - **BE1 (Lead):**
   - Hiện thực lõi máy trạng thái Sự cố: `incident-transitions.ts` và hàm suy diễn trạng thái `derive-incident-status.ts`.
   - Viết Unit test 100% độ phủ cho `deriveIncidentStatus` và `findTransition`.
@@ -141,6 +147,7 @@ gantt
   - Áp dụng che giấu thông tin nhạy cảm: Ẩn số điện thoại của Reporter đối với các vai trò không phải `OPERATOR`/`COMMANDER` (BR-09).
 
 #### 2. Nhiệm vụ Frontend:
+
 - **FE1:**
   - Xây dựng phân hệ Báo cáo cho Reporter (`/reports/new` và `/reports`):
     - Form nhập mô tả, bấm chọn tọa độ trên bản đồ hoặc dùng định vị trình duyệt, đính kèm tối đa 5 ảnh.
@@ -156,6 +163,7 @@ gantt
   - Xây dựng màn hình danh sách sự cố (`/incidents`): Bảng danh sách phân trang, thanh tìm kiếm, bộ lọc trạng thái.
 
 #### 3. Tiêu chí Nghiệm thu Tuần 2 (Milestone 2):
+
 - [x] Reporter gửi báo cáo kèm ảnh và vị trí thành công.
 - [x] Operator thấy cảnh báo xuất hiện trong hàng đợi, xem được ảnh và vị trí trên bản đồ.
 - [x] Operator xác nhận cảnh báo -> Hệ thống sinh sự cố mới với mã chuẩn `INC-...`.
@@ -164,9 +172,11 @@ gantt
 ---
 
 ### TUẦN 3: Động cơ Điều phối Hiện trường & Đẩy Sự kiện Thời gian thực (Socket.IO)
+
 > **Mục tiêu tuần 3:** Hoàn thiện xương sống điều phối của hệ thống: Gợi ý lực lượng, giao lệnh tác chiến, lực lượng phản ứng hiện trường cập nhật lộ trình và Socket.IO truyền phát cập nhật tức thì.
 
 #### 1. Nhiệm vụ Backend:
+
 - **BE1 (Lead):**
   - Hiện thực quản lý giao dịch khắt khe trong `DispatchService`:
     - Khóa bi quan theo đúng thứ tự: **`INCIDENT -> DISPATCH -> UNIT`** (`pessimistic_write`) để triệt tiêu nguy cơ Deadlock.
@@ -185,6 +195,7 @@ gantt
     - Viết `RealtimeListener`: Lắng nghe sự kiện nội bộ `EventEmitter2` phát ra sau khi transaction commit, định tuyến sự kiện Socket đến đúng danh sách phòng (Room-based).
 
 #### 2. Nhiệm vụ Frontend:
+
 - **FE2 (Realtime & Operations):**
   - Hoàn thiện `SocketProvider`: Kết nối socket thực tế, gắn access token, bắt các sự kiện (`alert.created`, `incident.updated`, `dispatch.assigned`, `unit.updated`).
   - Tích hợp cơ chế tự động làm mới TanStack Query: Debounce 300ms, tự động đồng bộ khi Reconnect (FR-RT-03).
@@ -200,6 +211,7 @@ gantt
     - Render các nút hành động theo mảng `incident.allowedActions` từ Backend (Đóng sự cố, Hủy sự cố, Đổi mức ưu tiên).
 
 #### 3. Tiêu chí Nghiệm thu Tuần 3 (Milestone 3):
+
 - [x] Operator chọn sự cố `CONFIRMED` -> Thấy danh sách lực lượng được xếp hạng theo cự ly gần nhất.
 - [x] Operator bấm giao lệnh -> Màn hình Responder của đội đó nhận thông báo chuông và lệnh mới tức thì qua Socket.IO (không cần F5 trang).
 - [x] Responder cập nhật `ĐÃ ĐẾN` -> Màn hình Operator thấy sự cố tự động đổi sang `IN_PROGRESS` trong vòng dưới 1 giây.
@@ -208,9 +220,11 @@ gantt
 ---
 
 ### TUẦN 4: Quản lý SLA, Dashboard Giám sát, Kịch bản Giả lập & Hoàn thiện Demo
+
 > **Mục tiêu tuần 4:** Đóng gói toàn bộ các tính năng còn lại (Giám sát SLA, Dashboard phân tích, Thông báo), xây dựng kịch bản giả lập demo hàng loạt, kiểm thử E2E và tối ưu hóa hệ thống.
 
 #### 1. Nhiệm vụ Backend:
+
 - **BE4:**
   - Xây dựng module `sla`: Tác vụ nền `@Cron('*/30 * * * * *')` quét kiểm tra các cảnh báo và sự cố quá hạn cam kết theo bảng SLA cấu hình. Phát sự kiện `sla.breached` đến Operator/Commander.
   - Xây dựng module `statistics`: Các endpoint thống kê cho Dashboard (`/statistics/overview`, `/statistics/incidents-by-type`, `/statistics/response-times`). Tính toán chính xác thời gian phản hồi trung bình qua các mốc thời gian.
@@ -223,6 +237,7 @@ gantt
   - Tối ưu hóa truy vấn TypeORM, kiểm tra lại toàn bộ Index trên PostgreSQL.
 
 #### 2. Nhiệm vụ Frontend:
+
 - **FE2:**
   - Xây dựng Dashboard Giám sát Điều hành cho Commander & Operator (`/dashboard`):
     - Các thẻ KPI (Tổng sự cố đang mở, Cảnh báo chờ xử lý, Lực lượng sẵn sàng, Ca khẩn cấp).
@@ -235,6 +250,7 @@ gantt
   - Rà soát toàn bộ giao diện: Tinh chỉnh Responsive trên trình duyệt điện thoại (chế độ Mobile view) cho màn hình Reporter và Responder.
 
 #### 3. Tiêu chí Nghiệm thu Tuần 4 (Milestone 4 - MVP Ready):
+
 - [x] Chạy script giả lập bắn 20 cảnh báo liên tục -> Hệ thống tiếp nhận ổn định, Socket.IO cập nhật danh sách và bản đồ mượt mà không nghẽn.
 - [x] Quá thời gian quy định -> Hệ thống hiển thị cảnh báo vi phạm SLA chuẩn xác.
 - [x] Dashboard hiển thị biểu đồ và chỉ số thời gian phản hồi thực tế.
@@ -244,23 +260,23 @@ gantt
 
 ## 4. Bảng Ma trận Đồng bộ & Giao tiếp Giữa 2 Team (Sync Matrix)
 
-| Mốc thời gian | Nội dung đồng bộ giữa Backend và Frontend | Sản phẩm bàn giao |
-|---|---|---|
-| **Cuối Tuần 1** | Chốt kết nối Auth, kiểm tra token refresh và cấu trúc layout theo vai trò. | Swagger hoạt động; Đăng nhập FE kết nối BE thực tế. |
-| **Giữa Tuần 2** | Thống nhất dữ liệu trả về của Form Báo cáo, ảnh upload và dữ liệu tọa độ bản đồ. | Endpoint `/alerts` và `/uploads` thông suốt với FE. |
-| **Cuối Tuần 2** | Kiểm thử luồng Duyệt cảnh báo -> Tạo sự cố -> Hiển thị trên bản đồ số. | Khớp toàn bộ schema của `incidents`. |
+| Mốc thời gian   | Nội dung đồng bộ giữa Backend và Frontend                                         | Sản phẩm bàn giao                                       |
+| --------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| **Cuối Tuần 1** | Chốt kết nối Auth, kiểm tra token refresh và cấu trúc layout theo vai trò.        | Swagger hoạt động; Đăng nhập FE kết nối BE thực tế.     |
+| **Giữa Tuần 2** | Thống nhất dữ liệu trả về của Form Báo cáo, ảnh upload và dữ liệu tọa độ bản đồ.  | Endpoint `/alerts` và `/uploads` thông suốt với FE.     |
+| **Cuối Tuần 2** | Kiểm thử luồng Duyệt cảnh báo -> Tạo sự cố -> Hiển thị trên bản đồ số.            | Khớp toàn bộ schema của `incidents`.                    |
 | **Giữa Tuần 3** | Thống nhất danh sách sự kiện Socket.IO (`payload` tối giản) và thứ tự phòng nhận. | Socket.IO Gateway kết nối ổn định với `SocketProvider`. |
-| **Cuối Tuần 3** | Chạy thử nghiệm toàn bộ luồng điều phối tác chiến hiện trường (Golden Flow). | Responder nhận lệnh và cập nhật tiến độ thông suốt. |
-| **Giữa Tuần 4** | Kiểm thử tải với script bắn cảnh báo tự động; kiểm tra vi phạm SLA. | Tinh chỉnh debounce cache TanStack Query. |
-| **Cuối Tuần 4** | Buổi diễn tập Demo toàn hệ thống (Dry-run). | Hệ thống hoàn thiện 100%, sẵn sàng báo cáo đề tài. |
+| **Cuối Tuần 3** | Chạy thử nghiệm toàn bộ luồng điều phối tác chiến hiện trường (Golden Flow).      | Responder nhận lệnh và cập nhật tiến độ thông suốt.     |
+| **Giữa Tuần 4** | Kiểm thử tải với script bắn cảnh báo tự động; kiểm tra vi phạm SLA.               | Tinh chỉnh debounce cache TanStack Query.               |
+| **Cuối Tuần 4** | Buổi diễn tập Demo toàn hệ thống (Dry-run).                                       | Hệ thống hoàn thiện 100%, sẵn sàng báo cáo đề tài.      |
 
 ---
 
 ## 5. Quản trị Rủi ro & Phương án Dự phòng (Risk Management)
 
-| Rủi ro tiềm ẩn | Mức độ | Biện pháp ngăn chặn & Xử lý dự phòng |
-|---|:---:|---|
-| **Lỗi đứt kết nối WebSocket khi demo** | Cao | Frontend áp dụng cơ chế tự động Reconnect; TanStack Query tự động tải lại dữ liệu REST khi kết nối lại (NFR-06). |
-| **Bản đồ Leaflet lỗi render trên Next.js** | Trung bình | Đã quy định bắt buộc dùng dynamic import với `ssr: false` tại quy tắc `.agent/rules/20-frontend-nextjs.md`. |
-| **Tranh chấp dữ liệu (Deadlock) khi nhiều người thao tác** | Cao | BE1 đã áp dụng khóa bi quan theo thứ tự nghiêm ngặt `INCIDENT -> DISPATCH -> UNIT` trong Transaction. |
-| **Chậm tiến độ tính năng nâng cao (SLA, Thống kê phức tạp)** | Thấp | Bám sát nguyên tắc MVP: Ưu tiên hoàn thành các yêu cầu **Must (M)** trước, các yêu cầu **Should (S)** và **Could (C)** làm ở nửa cuối tuần 4. |
+| Rủi ro tiềm ẩn                                               |   Mức độ   | Biện pháp ngăn chặn & Xử lý dự phòng                                                                                                          |
+| ------------------------------------------------------------ | :--------: | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Lỗi đứt kết nối WebSocket khi demo**                       |    Cao     | Frontend áp dụng cơ chế tự động Reconnect; TanStack Query tự động tải lại dữ liệu REST khi kết nối lại (NFR-06).                              |
+| **Bản đồ Leaflet lỗi render trên Next.js**                   | Trung bình | Đã quy định bắt buộc dùng dynamic import với `ssr: false` tại quy tắc `.agent/rules/20-frontend-nextjs.md`.                                   |
+| **Tranh chấp dữ liệu (Deadlock) khi nhiều người thao tác**   |    Cao     | BE1 đã áp dụng khóa bi quan theo thứ tự nghiêm ngặt `INCIDENT -> DISPATCH -> UNIT` trong Transaction.                                         |
+| **Chậm tiến độ tính năng nâng cao (SLA, Thống kê phức tạp)** |    Thấp    | Bám sát nguyên tắc MVP: Ưu tiên hoàn thành các yêu cầu **Must (M)** trước, các yêu cầu **Should (S)** và **Could (C)** làm ở nửa cuối tuần 4. |

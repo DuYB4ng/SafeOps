@@ -1,6 +1,6 @@
 FROM node:24-alpine AS base
 WORKDIR /app
-RUN corepack enable && corepack prepare pnpm@12.23.0 --activate
+RUN corepack enable && corepack prepare pnpm@10.34.9 --activate
 
 FROM base AS development
 ENV NODE_ENV=development

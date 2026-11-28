@@ -17,9 +17,7 @@ describe('HealthService', () => {
   });
 
   it('returns a safe 503 when PostgreSQL fails', async () => {
-    query.mockRejectedValue(
-      new Error('postgres://secret-password@private-host/db'),
-    );
+    query.mockRejectedValue(new Error('postgres://secret-password@private-host/db'));
     try {
       await service.check();
       throw new Error('Expected failure');
@@ -27,9 +25,7 @@ describe('HealthService', () => {
       expect(error).toBeInstanceOf(ServiceUnavailableException);
       const exception = error as ServiceUnavailableException;
       expect(exception.getStatus()).toBe(503);
-      expect(JSON.stringify(exception.getResponse())).not.toContain(
-        'secret-password',
-      );
+      expect(JSON.stringify(exception.getResponse())).not.toContain('secret-password');
     }
   });
 });

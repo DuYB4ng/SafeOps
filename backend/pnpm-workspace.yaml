@@ -1,5 +1,1 @@
-permissions:
-  '@scarf/scarf':
-    build: false
-  dotenv:
-    skills: false
+packages: []
